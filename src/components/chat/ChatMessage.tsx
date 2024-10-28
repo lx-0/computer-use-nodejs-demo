@@ -76,7 +76,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                className="min-h-[16px] h-3 w-3 p-0 opacity-30 hover:opacity-100 hover:bg-transparent transition-opacity [&_svg]:!h-[12px] [&_svg]:!w-[12px]"
+                className="h-2 p-0 opacity-30 hover:opacity-100 hover:bg-transparent transition-opacity [&_svg]:!h-[12px] [&_svg]:!w-[12px]"
                 onClick={handleCopyMessage}
               >
                 <Copy className="text-muted-foreground" />
@@ -92,15 +92,21 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     [handleCopyMessage]
   ); // Only recreate when handleCopyMessage changes
 
-  // Only render special log messages if it's a log type
+  const TimeStampRow = useCallback(
+    () => (
+      <span className="text-xs text-muted-foreground mb-1 px-2 opacity-30 hover:opacity-100 transition-opacity">
+        {message.type} • {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
+      </span>
+    ),
+    [message.type, message.timestamp]
+  );
+
+  // For log messages
   if (message.type === 'log') {
     return (
       <div className="mb-4 px-4">
         <div className="flex flex-col max-w-[80%]">
-          <span className="text-xs text-muted-foreground mb-1 px-2">
-            {message.type} •{' '}
-            {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
-          </span>
+          <TimeStampRow />
           <div className="rounded-lg bg-muted/50 p-4">
             <div
               className="cursor-pointer flex flex-col"
@@ -175,10 +181,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       )}
     >
       <div className="flex flex-col max-w-[80%]">
-        <span className="text-xs text-muted-foreground mb-1 px-2">
-          {message.type} •{' '}
-          {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
-        </span>
+        <TimeStampRow />
         <div
           className={cn(
             'rounded-2xl px-4 py-2',
