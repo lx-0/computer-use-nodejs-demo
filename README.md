@@ -2,6 +2,8 @@
 
 A Next.js application that uses a large language model to control a computer through both local system control and virtual machine (Docker) environments.
 
+![Screenshot](./public/images/screenshot.png)
+
 > **🚧 Work in Progress**
 >
 > This project is under active development. Some features may be incomplete or subject to change.
