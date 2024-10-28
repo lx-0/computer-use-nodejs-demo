@@ -4,11 +4,11 @@ A Next.js application that uses a large language model to control a computer thr
 
 [![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Radix_UI](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge&logo=radix-ui&logoColor=white)](https://www.radix-ui.com)
-[![Tailwind_CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Langchain](https://img.shields.io/badge/Langchain-000000?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain.com)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![shadcn/ui](https://img.shields.io/badge/shadcn--ui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)](https://ui.shadcn.com)
+[![Tailwind_CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Electron](https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![Built with Cursor](https://img.shields.io/badge/Built_With-Cursor-5C4EE5?style=for-the-badge)](https://cursor.com)
 
 ![Screenshot](./public/images/screenshot.png)
@@ -25,6 +25,9 @@ A Next.js application that uses a large language model to control a computer thr
 > - ✅ VNC integration
 > - ✅ Chat interface
 > - 🔳 (Generic) LLM integration
+>   - ✅ Base architecture
+>   - 🔳 Function calling
+>   - ⬜ Streaming support
 > - ⬜ Computer use tooling
 >   - ⬜ File management
 >   - ⬜ Screenshot analysis
@@ -86,6 +89,7 @@ A Next.js application that uses a large language model to control a computer thr
 - **UI Components**: Radix UI, Tailwind CSS
 - **Container Management**: Dockerode
 - **Remote Access**: VNC, SSH2
+- **LLM Integration**: Langchain.js
 - **Desktop Packaging**: Electron
 - **Terminal**: node-pty, xterm.js
 

@@ -15,6 +15,7 @@
 // - Electron for desktop application packaging
 
 // Docker Integration Features
+
 - Use dockerode for Docker API interactions
 - Support building images from local Dockerfiles
 - Stream build progress in real-time to chat interface
@@ -27,6 +28,7 @@
 - Wait for build completion before starting container
 
 // Chat Interface Features
+
 - Collapsible log messages with detailed view
 - Real-time build progress updates
 - Copy-to-clipboard functionality for logs
@@ -37,6 +39,7 @@
 - Two-line status display in Docker menu
 
 // Docker Container Configuration
+
 - Support for VNC server setup
 - NoVNC integration for web-based access
 - Environment variable configuration
@@ -47,6 +50,7 @@
 - Desktop environment configuration
 
 // Error Handling
+
 - Proper error display in chat interface
 - Build failure detection and handling
 - Container start/stop error management
@@ -54,6 +58,7 @@
 - Status update error handling
 
 // UI/UX Features
+
 - Responsive split view layout
 - Settings sidebar integration
 - Docker status icon with state indication
@@ -67,6 +72,7 @@
 // - Web Browser: Serve via Next.js server
 
 // Feature Requirements
+
 - Implement a chat interface for user interaction with the LLM
 - Provide both local system control and remote Docker container control options
 - Include a settings sidebar for configuration options
@@ -86,11 +92,13 @@
 - Implement copy-to-clipboard functionality for Docker container details
 
 // General guidelines
+
 - Always use TypeScript for better type safety and maintainability
 - Maintain clean code principles and follow best practices
 - Use strict and explicit typing; never use the 'any' keyword
 
 // Project structure
+
 - Organize the project into components, pages, and API routes
 - Use Next.js for the web application framework
 - Implement both local system control and Docker container control
@@ -98,51 +106,61 @@
 - Store Dockerfiles in a 'data/dockerfiles' directory
 
 // Coding standards
+
 - Use async/await for asynchronous operations
 - Properly handle errors and exceptions
 - Use meaningful variable and function names
 - Add comments for complex logic or non-obvious code
 
 // CLI Mode
+
 - Implement a CLI interface using a library like commander or yargs
 - Parse command-line arguments to define LLM tasks
 - Execute LLM tasks without launching the full UI
 
 // Electron Mode
+
 - Use Electron-builder for packaging the desktop application
 - Implement IPC (Inter-Process Communication) for Electron main and renderer processes
 - Ensure proper security settings for the Electron app
 
 // Web Mode
+
 - Use Next.js API routes for backend functionality
 - Implement server-side rendering where appropriate
 
 // React and Next.js specific
+
 - Use functional components with hooks
 - Implement server-side rendering where appropriate
 - Use Next.js API routes for backend functionality
 
 // UI Components
+
 - Use Radix UI primitives for accessible components
 - Implement custom UI components using Tailwind CSS
 - Use Lucide React for icons
 - Implement a dropdown menu for Docker-related actions
 
 // State Management
+
 - Use React hooks (useState, useEffect, useCallback) for local state management
 - Consider using React Context or a state management library for global state if needed
 
 // Styling
+
 - Use Tailwind CSS for styling components
 - Implement responsive design for all components
 - Use CSS modules or styled-components for component-specific styles if needed
 
 // API and Backend
+
 - Implement API routes for system control actions
 - Use child_process for executing system commands (in a secure manner)
 - Implement proper error handling and validation for API requests
 
 // Docker Integration
+
 - Use dockerode for Docker API interactions
 - Implement SSH connections to containers using ssh2
 - Use VNC for graphical interactions with containers
@@ -153,21 +171,25 @@
 - Display detailed container status and logs in the UI
 
 // Security
+
 - Implement proper authentication and authorization for API routes
 - Use secure practices when executing system commands
 - Sanitize and validate all user inputs
 - Implement appropriate security measures for Electron app
 
 // Performance
+
 - Optimize components for performance, especially the chat and VNC components
 - Use React.memo or useMemo for expensive computations
 - Implement virtualization for long lists if needed
 
 // Accessibility
+
 - Ensure all components are accessible (ARIA attributes, keyboard navigation)
 - Use semantic HTML elements
 
 // Testing
+
 - Write unit tests for components and utility functions
 - Implement integration tests for API routes
 - Use Jest and React Testing Library for frontend tests
@@ -175,6 +197,7 @@
 
 // Dependencies
 Ensure all required dependencies are properly installed and typed:
+
 - next
 - react
 - react-dom
@@ -193,14 +216,29 @@ Ensure all required dependencies are properly installed and typed:
 - commander or yargs (for CLI)
 
 // TypeScript configuration
+
 - Ensure strict mode is enabled in tsconfig.json
 - Use path aliases for cleaner imports
 
 // Maintenance
+
 - Regularly update dependencies to their latest compatible versions
 - Keep the codebase modular for easy maintenance and feature additions
 
 // Documentation
+
 - Add JSDoc comments for functions and components
 - Maintain a README with setup and development instructions
 - Include documentation for CLI usage, Electron app, and web mode
+
+// LLM Integration Features
+
+- Use Langchain.js for LLM abstraction
+- Implement secure backend-only API calls
+- Support function calling for system control
+- Handle streaming responses
+- Manage conversation context
+- Support multiple LLM providers
+- Implement proper error handling
+- Add response validation
+- Support function execution tracking
