@@ -80,6 +80,9 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    // Find the selected model info
+    const selectedModelInfo = AVAILABLE_MODELS.find((m) => m.id === selectedModel);
+
     const userMessageId = addChatMessage('user', inputMessage);
     setInputMessage('');
 
@@ -87,7 +90,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       const response = await llmApiService.sendMessage(inputMessage, selectedModel, {
         stream: false,
       });
-      addChatMessage('assistant', response.content);
+      addChatMessage('assistant', response.content, undefined, undefined, selectedModelInfo);
     } catch (error) {
       console.error('API error:', error);
       addChatMessage(

@@ -34,7 +34,12 @@ export interface ChatMessageData {
   content: string;
   subprocesses: Subprocess[];
   isExpanded?: boolean;
-  timestamp?: Date; // Add timestamp
+  timestamp?: Date;
+  model?: {
+    id: string;
+    name: string;
+    provider: string;
+  };
 }
 
 interface ChatMessageProps {
@@ -92,13 +97,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     [handleCopyMessage]
   ); // Only recreate when handleCopyMessage changes
 
-  const TimeStampRow = useCallback(
+  const MetaInfo = useCallback(
     () => (
-      <span className="text-xs text-muted-foreground mb-1 px-2 opacity-30 hover:opacity-100 transition-opacity">
-        {message.type} • {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
-      </span>
+      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mb-1 px-2">
+        <span className="opacity-30 hover:opacity-100 transition-opacity">
+          {message.type} • {message.model && message.model?.name + ' • '}
+          {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
+        </span>
+      </div>
     ),
-    [message.type, message.timestamp]
+    [message.type, message.timestamp, message.model]
   );
 
   // For log messages
@@ -106,7 +114,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return (
       <div className="mb-4 px-4">
         <div className="flex flex-col max-w-[80%]">
-          <TimeStampRow />
+          <MetaInfo />
           <div className="rounded-lg bg-muted/50 p-4">
             <div
               className="cursor-pointer flex flex-col"
@@ -172,7 +180,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   }
 
-  // Render chat messages (user/assistant) in WhatsApp style
+  // For chat messages
   return (
     <div
       className={cn(
@@ -181,7 +189,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       )}
     >
       <div className="flex flex-col max-w-[80%]">
-        <TimeStampRow />
+        <MetaInfo />
         <div
           className={cn(
             'rounded-2xl px-4 py-2',

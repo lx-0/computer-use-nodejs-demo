@@ -1,4 +1,5 @@
 import { ChatMessageData, Subprocess, SubprocessStatus } from '@/components/chat/ChatMessage';
+import { LLMModel } from '@/lib/llm/types';
 import { useCallback, useState } from 'react';
 
 type SubprocessUpdater = (subprocess: Subprocess) => Subprocess;
@@ -13,6 +14,7 @@ export const useChatMessages = () => {
       content: string,
       title?: string,
       service?: string,
+      model?: LLMModel,
       isExpanded = true
     ) => {
       const newMessage: ChatMessageData = {
@@ -24,6 +26,13 @@ export const useChatMessages = () => {
         subprocesses: [],
         isExpanded,
         timestamp: new Date(),
+        model: model
+          ? {
+              id: model.id,
+              name: model.name,
+              provider: model.provider,
+            }
+          : undefined,
       };
       setChatMessages((prev) => [...prev, newMessage]);
       return newMessage.id;
