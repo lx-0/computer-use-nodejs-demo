@@ -21,8 +21,6 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ⬜ Screenshot analysis
 >   - ⬜ Mouse and keyboard control
 >   - ⬜ Bash command execution
-> - ⬜ Conversation history
-> - ⬜ Multi Agent support
 > - 🔳 Launch options
 >   - ⬜ CLI
 >   - ✅ Web server
@@ -30,6 +28,8 @@ A Next.js application that uses a large language model to control a computer thr
 > - 🔳 Computer Use modes
 >   - ✅ Virtual (Docker)
 >   - ⬜ Local (direct control)
+> - ⬜ Conversation history
+> - ⬜ Multi Agent support
 >
 > Please check back later for updates or feel free to contribute!
 
