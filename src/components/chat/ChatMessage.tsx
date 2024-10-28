@@ -1,14 +1,18 @@
 import LogDetailsBlock from '@/components/chat/LogDetailsBlock';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
   AlertCircle,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
+  Copy,
   Loader2,
   XCircle,
 } from 'lucide-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 export type MessageType = 'log' | 'user' | 'assistant' | 'system';
 export type SubprocessStatus = 'building' | 'completed' | 'error' | 'running' | 'stopped';
@@ -47,6 +51,47 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   toggleMessageExpansion,
   toggleSubprocessExpansion,
 }) => {
+  const handleCopyMessage = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(message, null, 2));
+        toast({ description: 'Message copied to clipboard' });
+      } catch (error) {
+        console.error('Failed to copy:', error);
+        toast({
+          variant: 'destructive',
+          description: 'Failed to copy message',
+        });
+      }
+    },
+    [message]
+  ); // Only recreate when message changes
+
+  const ActionRow = useCallback(
+    () => (
+      <div className="flex items-center gap-2 px-2 mt-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className="min-h-[16px] h-3 w-3 p-0 opacity-30 hover:opacity-100 hover:bg-transparent transition-opacity [&_svg]:!h-[12px] [&_svg]:!w-[12px]"
+                onClick={handleCopyMessage}
+              >
+                <Copy className="text-muted-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="start">
+              <p className="text-xs">Copy message</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    ),
+    [handleCopyMessage]
+  ); // Only recreate when handleCopyMessage changes
+
   // Only render special log messages if it's a log type
   if (message.type === 'log') {
     return (
@@ -115,6 +160,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               </div>
             )}
           </div>
+          <ActionRow />
         </div>
       </div>
     );
@@ -143,6 +189,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         >
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         </div>
+        <ActionRow />
       </div>
     </div>
   );
