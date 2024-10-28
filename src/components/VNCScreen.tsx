@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import RFB from '@novnc/novnc/lib/rfb';
-import { MousePointer, MousePointerClick } from 'lucide-react';
+import { Copy, MousePointer, MousePointerClick } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 interface VNCScreenProps {
@@ -75,8 +76,49 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
     }
   };
 
+  const handleCopyScreen = async () => {
+    try {
+      if (!rfbRef.current) return;
+
+      const imageData = rfbRef.current.getImageData();
+      const canvas = document.createElement('canvas');
+      canvas.width = imageData.width;
+      canvas.height = imageData.height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.putImageData(imageData, 0, 0);
+      const dataUrl = canvas.toDataURL();
+
+      await navigator.clipboard.writeText(
+        JSON.stringify(
+          {
+            timestamp: new Date().toISOString(),
+            screenshot: dataUrl,
+            viewOnly: viewOnly,
+          },
+          null,
+          2
+        )
+      );
+
+      toast({
+        title: 'Success',
+        description: 'Screen data copied to clipboard',
+      });
+    } catch (error) {
+      console.error('Failed to copy screen data:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to copy screen data',
+      });
+    }
+  };
+
   return (
-    <Card className={cn('flex flex-col h-full w-full')}>
+    <Card className={cn('flex flex-col h-full w-full relative')}>
       <CardHeader className="flex-shrink-0 flex flex-row items-center justify-between">
         <CardTitle>VNC Screen</CardTitle>
         <Button
@@ -95,6 +137,17 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
       <CardContent className={cn('flex-grow relative overflow-hidden bg-gray-200')}>
         <div ref={vncContainerRef} className="absolute inset-0" />
       </CardContent>
+      <div className="absolute bottom-0 left-0 right-0 p-2 bg-background/80 backdrop-blur-sm border-t">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full flex items-center gap-2 text-xs"
+          onClick={handleCopyScreen}
+        >
+          <Copy className="h-3 w-3" />
+          Copy Screen Data
+        </Button>
+      </div>
     </Card>
   );
 };

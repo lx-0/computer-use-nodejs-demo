@@ -1,6 +1,6 @@
 'use client';
 
-import ChatComponent from '@/components/ChatComponent';
+import ChatComponent from '@/components/chat/ChatComponent';
 import Settings from '@/components/Settings';
 import Splitter from '@/components/Splitter';
 import { Toaster } from '@/components/ui/toaster';

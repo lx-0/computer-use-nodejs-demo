@@ -1,6 +1,6 @@
-import { ChatInput } from '@/components/ChatInput';
-import ChatMessage from '@/components/ChatMessage';
-import { DockerMenu } from '@/components/DockerMenu';
+import { ChatInput } from '@/components/chat/ChatInput';
+import ChatMessage from '@/components/chat/ChatMessage';
+import { DockerMenu } from '@/components/chat/DockerMenu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,7 @@ import { useDockerHandlers } from '@/hooks/useDockerHandlers';
 import { cn } from '@/lib/utils';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
+import ChatCopyButton from './ChatCopyButton';
 
 interface ChatComponentProps {
   isLocalMode: boolean;
@@ -120,18 +121,21 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden flex flex-col">
-        <ScrollArea className="flex-grow mb-4" ref={scrollAreaRef}>
-          {chatMessages.map((message, index) => (
-            <ChatMessage
-              key={index}
-              message={message}
-              index={index}
-              buildProgress={buildProgress}
-              toggleMessageExpansion={toggleMessageExpansion}
-              toggleSubprocessExpansion={toggleSubprocessExpansion}
-            />
-          ))}
-        </ScrollArea>
+        <div className="flex-grow overflow-hidden relative">
+          <ScrollArea className="h-full" ref={scrollAreaRef}>
+            {chatMessages.map((message, index) => (
+              <ChatMessage
+                key={index}
+                message={message}
+                index={index}
+                buildProgress={buildProgress}
+                toggleMessageExpansion={toggleMessageExpansion}
+                toggleSubprocessExpansion={toggleSubprocessExpansion}
+              />
+            ))}
+          </ScrollArea>
+          <ChatCopyButton messages={chatMessages} />
+        </div>
         <ChatInput value={inputMessage} onChange={setInputMessage} onSend={handleSendMessage} />
       </CardContent>
     </Card>

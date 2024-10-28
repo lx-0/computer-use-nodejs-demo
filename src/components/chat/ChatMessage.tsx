@@ -1,4 +1,4 @@
-import LogDetailsBlock from '@/components/LogDetailsBlock';
+import LogDetailsBlock from '@/components/chat/LogDetailsBlock';
 import {
   AlertCircle,
   CheckCircle2,

@@ -1,4 +1,4 @@
-import { ChatMessageData, Subprocess, SubprocessStatus } from '@/components/ChatMessage';
+import { ChatMessageData, Subprocess, SubprocessStatus } from '@/components/chat/ChatMessage';
 import { useCallback, useState } from 'react';
 
 type SubprocessUpdater = (subprocess: Subprocess) => Subprocess;
