@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useDockerHandlers } from '@/hooks/useDockerHandlers';
+import { AVAILABLE_MODELS } from '@/lib/llm/types';
 import { cn } from '@/lib/utils';
 import { LLMApiService } from '@/services/llm-api.service';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ChatCopyButton from './ChatCopyButton';
 
 interface ChatComponentProps {
@@ -27,6 +28,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   toggleSettings,
   onVncReady,
 }) => {
+  const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
+
   const {
     chatMessages,
     inputMessage,
@@ -141,7 +144,13 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
           </ScrollArea>
           <ChatCopyButton messages={chatMessages} />
         </div>
-        <ChatInput value={inputMessage} onChange={setInputMessage} onSend={handleSendMessage} />
+        <ChatInput
+          value={inputMessage}
+          onChange={setInputMessage}
+          onSend={handleSendMessage}
+          selectedModel={selectedModel}
+          onModelSelect={setSelectedModel}
+        />
       </CardContent>
     </Card>
   );

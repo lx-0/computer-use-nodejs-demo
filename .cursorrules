@@ -239,6 +239,8 @@ Ensure all required dependencies are properly installed and typed:
 - Handle streaming responses
 - Manage conversation context
 - Support multiple LLM providers
+- Support model selection and switching
+- Track model usage in messages
 - Implement proper error handling
 - Add response validation
 - Support function execution tracking

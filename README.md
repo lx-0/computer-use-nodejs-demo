@@ -26,6 +26,7 @@ A Next.js application that uses a large language model to control a computer thr
 > - ✅ Chat interface
 > - 🔳 (Generic) LLM integration
 >   - ✅ Base architecture
+>   - ✅ Model selection
 >   - 🔳 Function calling
 >   - ⬜ Streaming support
 > - ⬜ Computer use tooling
@@ -42,6 +43,7 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ⬜ Local (direct control)
 > - ⬜ Conversation history
 > - ⬜ Multi Agent support
+> - ⬜ Memory management
 >
 > Please check back later for updates or **feel free to contribute!**
 
