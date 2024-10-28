@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react';
 
 type SubprocessUpdater = (subprocess: Subprocess) => Subprocess;
 
-export function useChatMessages() {
+export const useChatMessages = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessageData[]>([]);
   const [inputMessage, setInputMessage] = useState<string>('');
 
@@ -15,20 +15,18 @@ export function useChatMessages() {
       service?: string,
       isExpanded = true
     ) => {
-      const id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id,
-          type,
-          content,
-          title,
-          service,
-          subprocesses: [],
-          isExpanded,
-        },
-      ]);
-      return id;
+      const newMessage: ChatMessageData = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type,
+        content,
+        title,
+        service,
+        subprocesses: [],
+        isExpanded,
+        timestamp: new Date(),
+      };
+      setChatMessages((prev) => [...prev, newMessage]);
+      return newMessage.id;
     },
     []
   );
@@ -150,4 +148,4 @@ export function useChatMessages() {
     toggleMessageExpansion,
     toggleSubprocessExpansion,
   } as const;
-}
+};
