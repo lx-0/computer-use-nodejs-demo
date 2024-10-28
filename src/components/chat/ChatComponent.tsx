@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useDockerHandlers } from '@/hooks/useDockerHandlers';
 import { cn } from '@/lib/utils';
+import { LLMApiService } from '@/services/llm-api.service';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import ChatCopyButton from './ChatCopyButton';
@@ -18,8 +19,6 @@ interface ChatComponentProps {
   toggleSettings: () => void;
   onVncReady: (ready: boolean) => void;
 }
-
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 const ChatComponent: React.FC<ChatComponentProps> = ({
   isLocalMode,
@@ -64,6 +63,8 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  const llmApiService = LLMApiService.getInstance();
+
   // Initialize container on mount
   useEffect(() => {
     startDefaultContainer();
@@ -75,13 +76,17 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   }, [vncReady, onVncReady]);
 
   const handleSendMessage = async () => {
-    if (inputMessage.trim()) {
-      addChatMessage('user', inputMessage);
-      setInputMessage('');
-      // Simulated response
-      setTimeout(() => {
-        addChatMessage('assistant', `I received your message: "${inputMessage}"`);
-      }, 1000);
+    if (!inputMessage.trim()) return;
+
+    const userMessageId = addChatMessage('user', inputMessage);
+    setInputMessage('');
+
+    try {
+      const response = await llmApiService.sendMessage(inputMessage);
+      addChatMessage('assistant', response.content);
+    } catch (error) {
+      console.error('API error:', error);
+      addChatMessage('log', 'Failed to get response from API. Please try again.', 'Error', 'API');
     }
   };
 

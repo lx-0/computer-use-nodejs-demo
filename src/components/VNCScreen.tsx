@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
@@ -16,7 +18,7 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
   const [viewOnly, setViewOnly] = useState(true);
 
   useEffect(() => {
-    if (!vncContainerRef.current || !vncReady) return;
+    if (typeof window === 'undefined' || !vncContainerRef.current || !vncReady) return;
 
     console.log('Attempting VNC connection...');
 
@@ -45,7 +47,6 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
         console.log('VNC credentials required');
       });
 
-      // Handle container resizing
       const resizeObserver = new ResizeObserver(() => {
         if (rfb && vncContainerRef.current) {
           rfb.scaleViewport = false;
@@ -64,8 +65,9 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
       };
     } catch (error) {
       console.error('Failed to connect to VNC:', error);
+      return;
     }
-  }, [vncReady]);
+  }, [vncReady, viewOnly]);
 
   const toggleViewOnly = () => {
     if (rfbRef.current) {

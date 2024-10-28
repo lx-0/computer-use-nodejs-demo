@@ -44,7 +44,10 @@ declare module '@novnc/novnc/lib/rfb' {
 
     // Events
     addEventListener(type: 'connect', listener: (e: CustomEvent) => void): void;
-    addEventListener(type: 'disconnect', listener: (e: CustomEvent<{ clean: boolean }>) => void): void;
+    addEventListener(
+      type: 'disconnect',
+      listener: (e: CustomEvent<{ clean: boolean }>) => void
+    ): void;
     addEventListener(
       type: 'credentialsrequired',
       listener: (e: CustomEvent<{ types: string[] }>) => void

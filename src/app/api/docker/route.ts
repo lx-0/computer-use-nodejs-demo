@@ -265,7 +265,7 @@ export async function GET(request: Request) {
       new ReadableStream({
         start(controller) {
           const listener = (event: any) => {
-            console.log('Emitting build event:', event);
+            // console.log('Emitting build event:', event);
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 
@@ -291,7 +291,7 @@ export async function GET(request: Request) {
       new ReadableStream({
         start(controller) {
           const listener = (event: any) => {
-            console.log('Emitting status event:', event);
+            // console.log('Emitting status event:', event);
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 

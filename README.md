@@ -9,7 +9,7 @@ A Next.js application that uses a large language model to control a computer thr
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 [![Electron](https://img.shields.io/badge/Electron-47848F?style=for-the-badge&logo=electron&logoColor=white)](https://www.electronjs.org)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Built with Cursor](https://img.shields.io/badge/Built_With-Cursor-5C4EE5?style=for-the-badge)](https://cursor.sh)
+[![Built with Cursor](https://img.shields.io/badge/Built_With-Cursor-5C4EE5?style=for-the-badge)](https://cursor.com)
 
 ![Screenshot](./public/images/screenshot.png)
 
@@ -24,7 +24,7 @@ A Next.js application that uses a large language model to control a computer thr
 > - ✅ Docker container management
 > - ✅ VNC integration
 > - ✅ Chat interface
-> - ⬜ (Generic) LLM integration
+> - 🔳 (Generic) LLM integration
 > - ⬜ Computer use tooling
 >   - ⬜ File management
 >   - ⬜ Screenshot analysis
@@ -40,7 +40,7 @@ A Next.js application that uses a large language model to control a computer thr
 > - ⬜ Conversation history
 > - ⬜ Multi Agent support
 >
-> Please check back later for updates or feel free to contribute!
+> Please check back later for updates or **feel free to contribute!**
 
 ## Features
 
