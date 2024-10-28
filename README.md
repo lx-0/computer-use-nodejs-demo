@@ -27,6 +27,7 @@ A Next.js application that uses a large language model to control a computer thr
 > - 🔳 (Generic) LLM integration
 >   - ✅ Base architecture
 >   - ✅ Model selection
+>   - ✅ Model tracking
 >   - 🔳 Function calling
 >   - ⬜ Streaming support
 > - ⬜ Computer use tooling
