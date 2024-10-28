@@ -23,6 +23,13 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ⬜ Bash command execution
 > - ⬜ Conversation history
 > - ⬜ Multi Agent support
+> - 🔳 Execution Modes
+>   - ⬜ CLI
+>   - ✅ Web server
+>   - ⬜ Electron app
+> - 🔳 Computer Use Modes
+>   - ✅ Virtual (Docker)
+>   - ⬜ Local
 >
 > Please check back later for updates or feel free to contribute!
 
