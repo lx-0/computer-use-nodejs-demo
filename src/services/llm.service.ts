@@ -1,6 +1,12 @@
 import { LLMProvider } from '@/lib/llm/provider';
 import { FunctionRegistry } from '@/lib/llm/registry';
-import { AVAILABLE_MODELS, FunctionDefinition, LLMConfig } from '@/lib/llm/types';
+import {
+  AVAILABLE_MODELS,
+  FunctionDefinition,
+  LLMConfig,
+  LLMRequestOptions,
+} from '@/lib/llm/types';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 export class LLMService {
   private static instance: LLMService;
@@ -31,7 +37,7 @@ export class LLMService {
         model: model.id,
         apiKey: this.getApiKey(model.provider),
         temperature: 0.7,
-        maxTokens: model.maxOutputTokens, // Use the model-specific output token limit
+        maxTokens: model.maxOutputTokens,
       };
 
       this.providers.set(modelId, new LLMProvider(config));
@@ -51,24 +57,23 @@ export class LLMService {
     return key;
   }
 
-  public async sendMessage(
-    message: string,
-    modelId: string,
-    options?: {
-      stream?: boolean;
-      functions?: string[];
-      maxTokens?: number;
-    }
-  ) {
+  public async sendMessage(message: string, modelId: string, options?: LLMRequestOptions) {
     try {
       const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
       if (!model) {
         throw new Error(`Model ${modelId} not found`);
       }
 
+      // Ensure history contains valid Langchain message types
+      const history = options?.history?.filter(
+        (msg) =>
+          msg instanceof HumanMessage || msg instanceof AIMessage || msg instanceof SystemMessage
+      );
+
       const provider = this.getProvider(modelId);
       return await provider.generateResponse(message, {
         ...options,
+        history,
         maxTokens: model.maxOutputTokens,
       });
     } catch (error) {

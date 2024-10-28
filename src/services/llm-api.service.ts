@@ -1,5 +1,6 @@
 'use client';
 
+import { GenerateOptions } from '@/lib/llm/provider';
 import { LLMResponse } from '@/lib/llm/types';
 
 export class LLMApiService {
@@ -15,10 +16,7 @@ export class LLMApiService {
   public async sendMessage(
     message: string,
     modelId: string,
-    options?: {
-      stream?: boolean;
-      functions?: string[];
-    }
+    options?: GenerateOptions
   ): Promise<LLMResponse> {
     const response = await fetch('/api/llm', {
       method: 'POST',
@@ -26,7 +24,14 @@ export class LLMApiService {
         'Content-Type': 'application/json',
         'x-api-key': process.env.NEXT_PUBLIC_API_KEY || '', // Ensure this is set
       },
-      body: JSON.stringify({ message, modelId, options }),
+      body: JSON.stringify({
+        message,
+        modelId,
+        options: {
+          ...options,
+          history: options?.history || [],
+        },
+      }),
     });
 
     if (!response.ok) {

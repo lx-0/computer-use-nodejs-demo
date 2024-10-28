@@ -1,13 +1,14 @@
 import { ChatAnthropic } from '@langchain/anthropic';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { HumanMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
-import { FunctionDefinition, LLMConfig, LLMResponse } from './types';
+import { FunctionDefinition, LLMConfig, LLMRequestOptions, LLMResponse } from './types';
 
-interface GenerateOptions {
+export interface GenerateOptions {
   functions?: string[];
   stream?: boolean;
   maxTokens?: number;
+  history?: Array<HumanMessage | AIMessage | SystemMessage>;
 }
 
 export class LLMProvider {
@@ -46,13 +47,14 @@ export class LLMProvider {
     this.functions.set(definition.name, definition);
   }
 
-  public async generateResponse(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
+  public async generateResponse(prompt: string, options?: LLMRequestOptions): Promise<LLMResponse> {
     try {
-      const response = await this.model.invoke([
-        new HumanMessage({
-          content: prompt,
-        }),
-      ]);
+      const messages = [
+        ...(Array.isArray(options?.history) ? options.history : []),
+        new HumanMessage({ content: prompt }),
+      ];
+
+      const response = await this.model.invoke(messages);
 
       const content =
         typeof response.content === 'string' ? response.content : JSON.stringify(response.content);
@@ -66,6 +68,7 @@ export class LLMProvider {
         },
       };
     } catch (error) {
+      console.error('Provider error:', error);
       throw new Error(
         `Failed to generate response: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

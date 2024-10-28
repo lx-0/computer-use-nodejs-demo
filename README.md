@@ -28,6 +28,8 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ✅ Base architecture
 >   - ✅ Model selection
 >   - ✅ Model tracking
+>   - ✅ Message history
+>   - 🔳 Context management
 >   - 🔳 Function calling
 >   - ⬜ Streaming support
 > - ⬜ Computer use tooling

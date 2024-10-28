@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useDockerHandlers } from '@/hooks/useDockerHandlers';
-import { AVAILABLE_MODELS } from '@/lib/llm/types';
+import { AVAILABLE_MODELS, convertToLangchainMessage } from '@/lib/llm/types';
 import { cn } from '@/lib/utils';
 import { LLMApiService } from '@/services/llm-api.service';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ChatCopyButton from './ChatCopyButton';
@@ -80,15 +81,19 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    // Find the selected model info
     const selectedModelInfo = AVAILABLE_MODELS.find((m) => m.id === selectedModel);
-
     const userMessageId = addChatMessage('user', inputMessage);
     setInputMessage('');
 
     try {
+      // Convert and filter out log messages and nulls
+      const history = chatMessages
+        .map(convertToLangchainMessage)
+        .filter((msg): msg is HumanMessage | AIMessage | SystemMessage => msg !== null);
+
       const response = await llmApiService.sendMessage(inputMessage, selectedModel, {
         stream: false,
+        history,
       });
       addChatMessage('assistant', response.content, undefined, undefined, selectedModelInfo);
     } catch (error) {

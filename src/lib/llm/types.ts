@@ -1,3 +1,6 @@
+import { ChatMessageData } from '@/components/chat/ChatMessage';
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+
 // Core LLM types
 export type LLMProvider = 'openai' | 'anthropic' | 'local';
 
@@ -146,3 +149,60 @@ export const AVAILABLE_MODELS_SORTED = AVAILABLE_MODELS.sort((a, b) => {
   // Then by context window size (larger first)
   return b.contextWindow - a.contextWindow;
 });
+
+// Chat Memory Types
+export interface ChatMemory {
+  messages: BaseMessage[]; // Changed from ChatMessage[] to BaseMessage[]
+  returnMessages: boolean;
+  maxTokens?: number;
+}
+
+export interface ChatMessageHistory {
+  addMessage(message: BaseMessage): Promise<void>;
+  getMessages(): Promise<BaseMessage[]>;
+  clear(): Promise<void>;
+}
+
+export interface LLMRequestOptions {
+  stream?: boolean;
+  functions?: string[];
+  history?: Array<HumanMessage | AIMessage | SystemMessage>;
+  maxTokens?: number;
+}
+
+// Convert our message types to Langchain message types
+export function convertToLangchainMessage(
+  message: ChatMessageData
+): HumanMessage | AIMessage | SystemMessage | null {
+  // Skip log messages
+  if (message.type === 'log') {
+    return null;
+  }
+
+  switch (message.type) {
+    case 'assistant':
+      return new AIMessage({ content: message.content });
+    case 'system':
+      return new SystemMessage({ content: message.content });
+    case 'user':
+      return new HumanMessage({ content: message.content });
+    default:
+      return null;
+  }
+}
+
+// Helper type for message roles
+export type MessageRole = 'human' | 'assistant' | 'system';
+
+// Helper function to create messages with proper typing
+export function createMessage(content: string, role: MessageRole): BaseMessage {
+  switch (role) {
+    case 'assistant':
+      return new AIMessage(content);
+    case 'system':
+      return new SystemMessage(content);
+    case 'human':
+    default:
+      return new HumanMessage({ content });
+  }
+}
