@@ -22,6 +22,7 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ⬜ Mouse and keyboard control
 >   - ⬜ Bash command execution
 > - ⬜ Conversation history
+> - ⬜ Multi Agent support
 >
 > Please check back later for updates or feel free to contribute!
 
