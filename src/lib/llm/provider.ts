@@ -4,6 +4,12 @@ import { HumanMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
 import { FunctionDefinition, LLMConfig, LLMResponse } from './types';
 
+interface GenerateOptions {
+  functions?: string[];
+  stream?: boolean;
+  maxTokens?: number;
+}
+
 export class LLMProvider {
   private config: LLMConfig;
   private model: BaseChatModel;
@@ -40,13 +46,7 @@ export class LLMProvider {
     this.functions.set(definition.name, definition);
   }
 
-  public async generateResponse(
-    prompt: string,
-    options?: {
-      functions?: string[];
-      stream?: boolean;
-    }
-  ): Promise<LLMResponse> {
+  public async generateResponse(prompt: string, options?: GenerateOptions): Promise<LLMResponse> {
     try {
       const response = await this.model.invoke([
         new HumanMessage({

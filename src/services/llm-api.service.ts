@@ -14,6 +14,7 @@ export class LLMApiService {
 
   public async sendMessage(
     message: string,
+    modelId: string,
     options?: {
       stream?: boolean;
       functions?: string[];
@@ -25,7 +26,7 @@ export class LLMApiService {
         'Content-Type': 'application/json',
         'x-api-key': process.env.NEXT_PUBLIC_API_KEY || '', // Ensure this is set
       },
-      body: JSON.stringify({ message, options }),
+      body: JSON.stringify({ message, modelId, options }),
     });
 
     if (!response.ok) {

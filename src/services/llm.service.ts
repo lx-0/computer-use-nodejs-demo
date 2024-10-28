@@ -1,25 +1,14 @@
-import { defaultLLMConfig } from '@/config/llm.config';
 import { LLMProvider } from '@/lib/llm/provider';
 import { FunctionRegistry } from '@/lib/llm/registry';
-import { FunctionDefinition, LLMConfig } from '@/lib/llm/types';
+import { AVAILABLE_MODELS, FunctionDefinition, LLMConfig } from '@/lib/llm/types';
 
 export class LLMService {
   private static instance: LLMService;
-  private provider: LLMProvider;
+  private providers: Map<string, LLMProvider>;
   private registry: FunctionRegistry;
 
   private constructor() {
-    // Get API keys from environment
-    const config: LLMConfig = {
-      ...defaultLLMConfig,
-      apiKey: process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '',
-    };
-
-    if (!config.apiKey) {
-      throw new Error('No API key found in environment variables');
-    }
-
-    this.provider = new LLMProvider(config);
+    this.providers = new Map();
     this.registry = FunctionRegistry.getInstance();
   }
 
@@ -30,15 +19,58 @@ export class LLMService {
     return LLMService.instance;
   }
 
+  private getProvider(modelId: string): LLMProvider {
+    if (!this.providers.has(modelId)) {
+      const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+      if (!model) {
+        throw new Error(`Model ${modelId} not found`);
+      }
+
+      const config: LLMConfig = {
+        provider: model.provider,
+        model: model.id,
+        apiKey: this.getApiKey(model.provider),
+        temperature: 0.7,
+        maxTokens: model.maxOutputTokens, // Use the model-specific output token limit
+      };
+
+      this.providers.set(modelId, new LLMProvider(config));
+    }
+
+    return this.providers.get(modelId)!;
+  }
+
+  private getApiKey(provider: string): string {
+    const key =
+      provider === 'anthropic' ? process.env.ANTHROPIC_API_KEY : process.env.OPENAI_API_KEY;
+
+    if (!key) {
+      throw new Error(`No API key found for provider ${provider}`);
+    }
+
+    return key;
+  }
+
   public async sendMessage(
     message: string,
+    modelId: string,
     options?: {
       stream?: boolean;
       functions?: string[];
+      maxTokens?: number;
     }
   ) {
     try {
-      return await this.provider.generateResponse(message, options);
+      const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+      if (!model) {
+        throw new Error(`Model ${modelId} not found`);
+      }
+
+      const provider = this.getProvider(modelId);
+      return await provider.generateResponse(message, {
+        ...options,
+        maxTokens: model.maxOutputTokens,
+      });
     } catch (error) {
       throw new Error(
         `LLM Service error: ${error instanceof Error ? error.message : 'Unknown error'}`
@@ -48,7 +80,10 @@ export class LLMService {
 
   public registerFunction(definition: FunctionDefinition): void {
     this.registry.register(definition);
-    this.provider.registerFunction(definition);
+    // Register function with all providers
+    this.providers.forEach((provider) => {
+      provider.registerFunction(definition);
+    });
   }
 
   public listFunctions(): FunctionDefinition[] {

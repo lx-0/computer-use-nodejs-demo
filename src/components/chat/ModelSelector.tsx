@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { LLMModel } from '@/lib/llm/types';
+import { cn } from '@/lib/utils';
 import React from 'react';
 
 interface ModelSelectorProps {
@@ -25,10 +26,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
   return (
     <Select value={selectedModel} onValueChange={onModelSelect}>
-      <SelectTrigger className="w-[250px]">
+      <SelectTrigger className="w-[300px]">
         <SelectValue placeholder="Select model">{selectedModelInfo?.name}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="w-[300px]">
         {Object.entries(
           models.reduce(
             (acc, model) => ({
@@ -39,13 +40,27 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           )
         ).map(([provider, providerModels]) => (
           <SelectGroup key={provider}>
-            <SelectLabel className="capitalize">{provider}</SelectLabel>
+            <SelectLabel className="px-6 text-sm font-semibold capitalize">{provider}</SelectLabel>
             {providerModels.map((model) => (
-              <SelectItem key={model.id} value={model.id} className="pl-6">
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-medium">{model.name}</span>
+              <SelectItem
+                key={model.id}
+                value={model.id}
+                className={cn('py-3 px-6', 'focus:bg-accent', 'data-[state=checked]:bg-accent')}
+              >
+                <div className="grid gap-1.5 w-full">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">{model.name}</span>
+                    {model.trainingCutOffDate && (
+                      <span className="text-xs text-muted-foreground">
+                        Updated: {model.trainingCutOffDate}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-muted-foreground">{model.description}</span>
-                  <span className="text-xs font-mono text-muted-foreground/70">{model.id}</span>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground/70">
+                    <span>{model.id}</span>
+                    <span>{(model.contextWindow / 1000).toFixed(0)}k ctx</span>
+                  </div>
                 </div>
               </SelectItem>
             ))}

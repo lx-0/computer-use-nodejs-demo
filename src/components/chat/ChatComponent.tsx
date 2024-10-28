@@ -28,6 +28,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
   toggleSettings,
   onVncReady,
 }) => {
+  const llmApiService = LLMApiService.getInstance();
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
 
   const {
@@ -66,8 +67,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const llmApiService = LLMApiService.getInstance();
-
   // Initialize container on mount
   useEffect(() => {
     startDefaultContainer();
@@ -85,11 +84,18 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     setInputMessage('');
 
     try {
-      const response = await llmApiService.sendMessage(inputMessage);
+      const response = await llmApiService.sendMessage(inputMessage, selectedModel, {
+        stream: false,
+      });
       addChatMessage('assistant', response.content);
     } catch (error) {
       console.error('API error:', error);
-      addChatMessage('log', 'Failed to get response from API. Please try again.', 'Error', 'API');
+      addChatMessage(
+        'system',
+        'Failed to get response from API. Please try again.',
+        'Error',
+        'API'
+      );
     }
   };
 
