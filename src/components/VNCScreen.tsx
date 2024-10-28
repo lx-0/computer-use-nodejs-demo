@@ -67,7 +67,7 @@ const VNCScreen: React.FC<VNCScreenProps> = ({ vncReady }) => {
       console.error('Failed to connect to VNC:', error);
       return;
     }
-  }, [vncReady, viewOnly]);
+  }, [vncReady]);
 
   const toggleViewOnly = () => {
     if (rfbRef.current) {
