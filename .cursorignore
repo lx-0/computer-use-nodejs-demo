@@ -1,6 +1,0 @@
-dist/
-node_modules/
-.backup/
-.next/
-.env
-.env.local
