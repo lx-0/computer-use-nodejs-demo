@@ -30,11 +30,15 @@ export async function GET(req: NextRequest): Promise<Response> {
       let throttledSendStatus: ReturnType<typeof throttle> | null = null;
 
       // Helper function to check if we can send
-      const canSend = () => !isControllerClosed;
+      const canSend = () => !isControllerClosed && controller.desiredSize !== null;
 
       // Helper function to send status update
       const sendStatus = (status: OllamaModelStatus) => {
-        if (!canSend()) return;
+        if (!canSend()) {
+          console.log('Skipping status update - controller is closed or stream ended');
+          return;
+        }
+
         try {
           const statusWithTimestamp = {
             ...status,
@@ -42,7 +46,10 @@ export async function GET(req: NextRequest): Promise<Response> {
           };
           controller.enqueue(encoder.encode(`data: ${JSON.stringify(statusWithTimestamp)}\n\n`));
         } catch (error) {
-          if (!isControllerClosed) {
+          if (error instanceof Error && error.message.includes('Controller is already closed')) {
+            console.log('Stream was closed, cleaning up');
+            cleanup();
+          } else if (!isControllerClosed) {
             console.error('Error sending status:', error);
           }
         }
@@ -51,13 +58,18 @@ export async function GET(req: NextRequest): Promise<Response> {
       let keepAliveInterval: ReturnType<typeof setInterval> | undefined;
 
       const cleanup = () => {
-        if (isControllerClosed) return; // Prevent multiple cleanups
+        if (isControllerClosed) {
+          console.log('Cleanup already performed');
+          return;
+        }
 
+        console.log('Performing cleanup');
         isControllerClosed = true;
 
         // Cancel throttled function if it exists
         if (throttledSendStatus) {
           throttledSendStatus.cancel();
+          throttledSendStatus.flush(); // Flush any pending updates
           throttledSendStatus = null;
         }
 
@@ -69,7 +81,9 @@ export async function GET(req: NextRequest): Promise<Response> {
 
         // Close the controller last
         try {
-          controller.close();
+          if (controller.desiredSize !== null) {
+            controller.close();
+          }
         } catch (error) {
           console.error('Error closing controller:', error);
         }
@@ -88,9 +102,13 @@ export async function GET(req: NextRequest): Promise<Response> {
         };
         sendStatus(initialStatus);
 
-        // Create throttled version of sendStatus
+        // Create throttled version of sendStatus with early exit
         throttledSendStatus = throttle((status: OllamaModelStatus) => {
-          if (canSend()) sendStatus(status);
+          if (!canSend()) {
+            console.log('Skipping throttled status - stream ended');
+            return;
+          }
+          sendStatus(status);
         }, 1000);
 
         // Start pull process with progress callback
@@ -120,9 +138,12 @@ export async function GET(req: NextRequest): Promise<Response> {
           }
         });
 
-        // Keep-alive interval
+        // Keep-alive interval with check
         keepAliveInterval = setInterval(() => {
-          if (!canSend()) return;
+          if (!canSend()) {
+            clearInterval(keepAliveInterval);
+            return;
+          }
           try {
             controller.enqueue(encoder.encode(': ping\n\n'));
           } catch (error) {
