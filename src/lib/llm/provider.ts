@@ -1,9 +1,10 @@
+import { FunctionDefinition } from '@/lib/functions/types';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
-import { FunctionDefinition, LLMConfig, LLMRequestOptions, LLMResponse } from './types';
+import { LLMConfig, LLMRequestOptions, LLMResponse } from './types';
 
 export interface GenerateOptions {
   functions?: string[];

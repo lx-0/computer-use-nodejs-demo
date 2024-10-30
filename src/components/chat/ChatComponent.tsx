@@ -156,7 +156,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
         </div>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden flex flex-col">
-        <div className="flex-grow overflow-hidden relative">
+        <div className="flex-grow overflow-y-auto relative">
           {chatMessages.map((message, index) => (
             <ChatMessage
               key={index}

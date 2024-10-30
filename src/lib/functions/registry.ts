@@ -1,4 +1,4 @@
-import { FunctionDefinition } from '../llm/types';
+import { FunctionDefinition } from './types';
 
 interface FunctionRegistry {
   functions: Map<string, FunctionDefinition>;

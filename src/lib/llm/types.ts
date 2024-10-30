@@ -31,13 +31,6 @@ export interface LLMConfig {
   ollamaConfig?: OllamaConfig; // Add Ollama configuration
 }
 
-export interface FunctionDefinition {
-  name: string;
-  description: string;
-  parameters: Record<string, unknown>;
-  required?: string[];
-}
-
 export interface LLMResponse {
   content: string;
   functionCall?: {
