@@ -1,4 +1,4 @@
-import { OllamaService } from '@/lib/llm/ollama';
+import { OllamaService } from '@/lib/llm/api/ollama';
 import { OllamaModelStatus } from '@/lib/llm/types';
 import { throttle } from 'lodash';
 import { NextRequest, NextResponse } from 'next/server';

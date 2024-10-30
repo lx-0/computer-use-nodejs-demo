@@ -5,7 +5,7 @@ import Settings from '@/components/Settings';
 import Splitter from '@/components/Splitter';
 import { Toaster } from '@/components/ui/toaster';
 import VNCScreen from '@/components/VNCScreen';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/style';
 import React, { useCallback, useState } from 'react';
 
 const Home: React.FC = () => {

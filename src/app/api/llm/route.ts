@@ -1,4 +1,4 @@
-import { LLMService } from '@/services/llm.service';
+import { LLMService } from '@/lib/llm/llm.service';
 import {
   AIMessage,
   AIMessageFields,

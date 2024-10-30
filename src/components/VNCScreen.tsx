@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/style';
 import RFB from '@novnc/novnc/lib/rfb';
 import { Copy, MousePointer, MousePointerClick } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';

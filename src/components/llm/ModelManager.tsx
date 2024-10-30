@@ -25,7 +25,13 @@ const ModelStatusDisplay: React.FC<ModelStatusDisplayProps> = ({ modelId, status
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm">
-        {status.status === 'checking' ? (
+        {status.status === 'error' || status.error ? (
+          <div className="flex items-center gap-2 text-red-500">
+            <XCircle className="h-4 w-4" />
+            <span>Error</span>
+            {status.error && <span className="text-xs">({status.error})</span>}
+          </div>
+        ) : status.status === 'checking' ? (
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Checking</span>
@@ -39,12 +45,6 @@ const ModelStatusDisplay: React.FC<ModelStatusDisplayProps> = ({ modelId, status
           <div className="flex items-center gap-2 text-green-500">
             <CheckCircle className="h-4 w-4" />
             <span>Ready</span>
-          </div>
-        ) : status.status === 'error' ? (
-          <div className="flex items-center gap-2 text-red-500">
-            <XCircle className="h-4 w-4" />
-            <span>Error</span>
-            {status.error && <span className="text-xs">({status.error})</span>}
           </div>
         ) : status.status === 'not_downloaded' ? (
           <div className="flex items-center gap-2">

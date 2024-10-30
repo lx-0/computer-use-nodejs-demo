@@ -1,4 +1,4 @@
-import { OllamaService } from '@/lib/llm/ollama';
+import { OllamaService } from '@/lib/llm/api/ollama';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest): Promise<Response> {

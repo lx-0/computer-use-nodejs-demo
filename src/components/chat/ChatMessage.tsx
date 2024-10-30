@@ -2,7 +2,7 @@ import LogDetailsBlock from '@/components/chat/LogDetailsBlock';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/style';
 import {
   AlertCircle,
   CheckCircle2,
@@ -116,9 +116,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <div className="flex flex-col max-w-[80%]">
           <MetaInfo />
           <div className="rounded-lg bg-muted/50 p-4">
-            <div
+            <button
               className="cursor-pointer flex flex-col"
               onClick={() => toggleMessageExpansion(message.id)}
+              type="button"
             >
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -136,18 +137,19 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               </div>
 
               {message.title && <h3 className="text-sm font-semibold mb-1">{message.title}</h3>}
-            </div>
+            </button>
 
             {message.isExpanded && message.subprocesses.length > 0 && (
               <div className="mt-2 space-y-2">
                 {message.subprocesses.map((subprocess) => (
                   <div key={subprocess.id} className="pl-4 border-l-2 border-muted">
-                    <div
+                    <button
                       className="cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleSubprocessExpansion(message.id, subprocess.id);
                       }}
+                      type="button"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -163,7 +165,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                       {subprocess.subtitle && (
                         <p className="text-sm text-muted-foreground ml-5">{subprocess.subtitle}</p>
                       )}
-                    </div>
+                    </button>
                     {subprocess.isExpanded && (
                       <div className="mt-2 ml-5">
                         <LogDetailsBlock content={subprocess.content} />

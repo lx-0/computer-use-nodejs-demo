@@ -1,4 +1,4 @@
-import { OllamaService } from '@/lib/llm/ollama';
+import { OllamaService } from '@/lib/llm/api/ollama';
 import { ModelResourceMetrics } from '@/lib/llm/types';
 import { NextApiRequest, NextApiResponse } from 'next';
 

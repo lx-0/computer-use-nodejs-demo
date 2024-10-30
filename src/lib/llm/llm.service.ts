@@ -1,4 +1,4 @@
-import { OllamaService } from '@/lib/llm/ollama';
+import { OllamaService } from '@/lib/llm/api/ollama';
 import { LLMProvider } from '@/lib/llm/provider';
 import { FunctionRegistry } from '@/lib/llm/registry';
 import {

@@ -1,5 +1,5 @@
+import { ModelResourceMetrics, OllamaModelInfo, OllamaModelStatus } from '@/lib/llm/types';
 import { getOllamaHeaders } from '@/lib/utils/api';
-import { ModelResourceMetrics, OllamaModelInfo, OllamaModelStatus } from './types';
 
 // Define a type for the model
 interface Model {

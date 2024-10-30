@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/select';
 import { OllamaClient } from '@/lib/llm/ollama-client';
 import { AVAILABLE_MODELS, LLMModel } from '@/lib/llm/types';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/style';
 import { Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 

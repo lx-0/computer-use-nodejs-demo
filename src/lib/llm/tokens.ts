@@ -1,4 +1,4 @@
-import { getMessageContent } from '@/lib/utils/langchain';
+import { getMessageContent } from '@/lib/llm/utils/langchain';
 import { BaseMessage } from '@langchain/core/messages';
 import { getEncoding, Tiktoken } from 'js-tiktoken';
 import { LLMProvider } from './types';

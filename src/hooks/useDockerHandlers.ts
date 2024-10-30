@@ -1,5 +1,5 @@
 import { ChatMessageData, Subprocess, SubprocessStatus } from '@/components/chat/ChatMessage';
-import { dockerService } from '@/services/dockerService';
+import { dockerService } from '@/lib/docker/dockerService';
 import { EventEmitter } from 'events';
 import { useCallback, useEffect, useState } from 'react';
 
