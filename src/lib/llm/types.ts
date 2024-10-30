@@ -274,13 +274,13 @@ export function createMessage(content: string, role: MessageRole): BaseMessage {
 // Update OllamaModelStatus to include timestamp
 export interface OllamaModelStatus {
   name: string;
-  status: 'checking' | 'ready' | 'downloading' | 'error';
+  status: 'checking' | 'ready' | 'downloading' | 'error' | 'not_downloaded';
   progress?: number;
   error?: string;
   downloadedSize?: number;
   totalSize?: number;
   lastUpdated: Date;
-  timestamp?: string; // Add timestamp for event stream messages
+  timestamp?: string;
   metrics?: ModelResourceMetrics;
 }
 

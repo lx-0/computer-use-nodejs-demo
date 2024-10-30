@@ -2,7 +2,15 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useModelManager } from '@/hooks/useModelManager';
 import { LLMModel, OllamaModelStatus } from '@/lib/llm/types';
-import { CheckCircle, ChevronDown, ChevronRight, Clock, Loader2, XCircle } from 'lucide-react';
+import {
+  CheckCircle,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Download,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 interface ModelStatusDisplayProps {
@@ -38,10 +46,15 @@ const ModelStatusDisplay: React.FC<ModelStatusDisplayProps> = ({ modelId, status
             <span>Error</span>
             {status.error && <span className="text-xs">({status.error})</span>}
           </div>
+        ) : status.status === 'not_downloaded' ? (
+          <div className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            <span>Not Downloaded</span>
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            <span>Not Downloaded</span>
+            <span>Unknown Status</span>
           </div>
         )}
       </div>
@@ -108,10 +121,8 @@ export function ModelManager({ modelId, model, isInstalled, onStatusChange }: Mo
           </div>
           <ModelStatusDisplay modelId={modelId} status={status} debug={debug} />
         </div>
-        {!isInstalled && status.status !== 'ready' && (
-          <Button onClick={handleDownload} disabled={status.status === 'downloading'}>
-            Download Model
-          </Button>
+        {!isInstalled && status.status === 'not_downloaded' && (
+          <Button onClick={handleDownload}>Download Model</Button>
         )}
       </div>
     </Card>

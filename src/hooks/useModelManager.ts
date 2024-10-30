@@ -10,7 +10,7 @@ export function useModelManager(modelId: string, isInstalled: boolean) {
     () =>
       globalDownloadStates.get(modelId) || {
         name: modelId,
-        status: isInstalled ? 'ready' : 'checking',
+        status: isInstalled ? 'ready' : 'not_downloaded',
         lastUpdated: new Date(),
       }
   );
@@ -65,7 +65,7 @@ export function useModelManager(modelId: string, isInstalled: boolean) {
           return;
         }
 
-        // If model is installed, set status to ready
+        // If model is installed, check its status, otherwise mark as not downloaded
         if (isInstalled && isMountedRef.current) {
           setStatus((prev) => ({
             ...prev,
@@ -75,7 +75,7 @@ export function useModelManager(modelId: string, isInstalled: boolean) {
         } else if (isMountedRef.current) {
           setStatus((prev) => ({
             ...prev,
-            status: 'checking',
+            status: 'not_downloaded',
             lastUpdated: new Date(),
           }));
         }
