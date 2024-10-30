@@ -17,7 +17,12 @@ const ModelStatusDisplay: React.FC<ModelStatusDisplayProps> = ({ modelId, status
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm">
-        {status.status === 'downloading' && status.progress ? (
+        {status.status === 'checking' ? (
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Checking</span>
+          </div>
+        ) : status.status === 'downloading' && status.progress ? (
           <div className="flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Downloading: {Math.round(status.progress)}%</span>
@@ -79,7 +84,7 @@ interface ModelManagerProps {
 
 export function ModelManager({ modelId, model, isInstalled, onStatusChange }: ModelManagerProps) {
   const [debug, setDebug] = useState<string[]>([]);
-  const { status, handleDownload } = useModelManager(modelId);
+  const { status, handleDownload } = useModelManager(modelId, isInstalled);
 
   useEffect(() => {
     onStatusChange(status);

@@ -5,12 +5,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // Create a static map to persist download states across component instances
 const globalDownloadStates = new Map<string, OllamaModelStatus>();
 
-export function useModelManager(modelId: string) {
+export function useModelManager(modelId: string, isInstalled: boolean) {
   const [status, setStatus] = useState<OllamaModelStatus>(
     () =>
       globalDownloadStates.get(modelId) || {
         name: modelId,
-        status: 'checking',
+        status: isInstalled ? 'ready' : 'checking',
         lastUpdated: new Date(),
       }
   );
@@ -43,6 +43,57 @@ export function useModelManager(modelId: string) {
       cleanup();
     };
   }, [cleanup]);
+
+  // Initial status check
+  useEffect(() => {
+    const checkInitialStatus = async () => {
+      if (!isMountedRef.current || isDownloadingRef.current) return;
+
+      try {
+        const client = OllamaClient.getInstance();
+        const isHealthy = await client.checkHealth();
+
+        if (!isHealthy) {
+          if (isMountedRef.current) {
+            setStatus((prev) => ({
+              ...prev,
+              status: 'error',
+              error: 'Ollama service is not healthy',
+              lastUpdated: new Date(),
+            }));
+          }
+          return;
+        }
+
+        // If model is installed, set status to ready
+        if (isInstalled && isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'ready',
+            lastUpdated: new Date(),
+          }));
+        } else if (isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'checking',
+            lastUpdated: new Date(),
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to check initial status:', error);
+        if (isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'error',
+            error: 'Failed to check status',
+            lastUpdated: new Date(),
+          }));
+        }
+      }
+    };
+
+    checkInitialStatus();
+  }, [modelId, isInstalled]);
 
   // Check initial status and set up event stream
   useEffect(() => {
