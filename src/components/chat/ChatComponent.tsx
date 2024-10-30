@@ -65,8 +65,6 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     addSubprocess,
   });
 
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
   // Initialize container on mount
   useEffect(() => {
     startDefaultContainer();
