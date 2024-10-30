@@ -65,8 +65,8 @@ export function LocalModels() {
               modelId={model.id}
               model={model}
               isInstalled={isInstalled}
-              onStatusChange={(status) => {
-                console.log('Model status changed:', model.id, status);
+              onStatusChange={(_status) => {
+                // console.log('Model status changed:', model.id, status);
               }}
             />
           );

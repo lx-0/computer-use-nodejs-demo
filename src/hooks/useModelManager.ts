@@ -1,20 +1,56 @@
 import { OllamaClient } from '@/lib/llm/ollama-client';
 import { OllamaModelStatus } from '@/lib/llm/types';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+// Create a static map to persist download states across component instances
+const globalDownloadStates = new Map<string, OllamaModelStatus>();
 
 export function useModelManager(modelId: string) {
-  const [status, setStatus] = useState<OllamaModelStatus>({
-    name: modelId,
-    status: 'checking',
-    lastUpdated: new Date(),
-  });
+  const [status, setStatus] = useState<OllamaModelStatus>(
+    () =>
+      globalDownloadStates.get(modelId) || {
+        name: modelId,
+        status: 'checking',
+        lastUpdated: new Date(),
+      }
+  );
+
+  // Keep refs for cleanup and state tracking
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const isDownloadingRef = useRef<boolean>(false);
+  const isMountedRef = useRef<boolean>(true);
+
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    if (eventSourceRef.current) {
+      console.log('Cleaning up event source for:', modelId);
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    isDownloadingRef.current = false;
+  }, [modelId]);
+
+  // Update global state when local state changes
+  useEffect(() => {
+    globalDownloadStates.set(modelId, status);
+  }, [modelId, status]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
+  }, [cleanup]);
 
   // Check initial status and set up event stream
   useEffect(() => {
     const client = OllamaClient.getInstance();
 
-    // Get initial status
     const checkHealth = async () => {
+      if (!isMountedRef.current) return;
+
       try {
         const isHealthy = await client.checkHealth();
         if (!isHealthy) {
@@ -29,52 +65,76 @@ export function useModelManager(modelId: string) {
 
         // Get initial model status
         const currentStatus = client.getModelStatus(modelId);
-        if (currentStatus) {
+        if (currentStatus && isMountedRef.current) {
           setStatus(currentStatus);
         }
       } catch (error) {
         console.error('Failed to check health:', error);
-        setStatus((prev) => ({
-          ...prev,
-          status: 'error',
-          error: 'Failed to check health',
-          lastUpdated: new Date(),
-        }));
+        if (isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'error',
+            error: 'Failed to check health',
+            lastUpdated: new Date(),
+          }));
+        }
       }
     };
 
-    checkHealth();
+    // Only check health if not downloading
+    if (!isDownloadingRef.current) {
+      checkHealth();
+    }
 
-    // Set up event stream for status updates
-    const eventSource = client.setupModelStatusStream(modelId);
+    // Set up event stream for status updates if downloading
+    if (status.status === 'downloading' && !eventSourceRef.current) {
+      isDownloadingRef.current = true;
+      eventSourceRef.current = client.setupPullStream(modelId);
 
-    // Handle incoming status updates
-    eventSource.onmessage = (event: MessageEvent) => {
-      try {
-        const newStatus = JSON.parse(event.data) as OllamaModelStatus;
-        setStatus(newStatus);
-      } catch (error) {
-        console.error('Failed to parse status update:', error);
-      }
-    };
+      eventSourceRef.current.onmessage = (event: MessageEvent) => {
+        if (!isMountedRef.current) return;
 
-    eventSource.onerror = () => {
-      console.error('Status EventSource error');
-      setStatus((prev) => ({
-        ...prev,
-        status: 'error',
-        error: 'Connection error',
-        lastUpdated: new Date(),
-      }));
-    };
+        try {
+          const newStatus = JSON.parse(event.data) as OllamaModelStatus;
+          setStatus(newStatus);
 
-    return () => {
-      eventSource.close();
-    };
-  }, [modelId]);
+          // Close stream if download is complete or failed
+          if (newStatus.status === 'ready' || newStatus.status === 'error') {
+            cleanup();
+          }
+        } catch (error) {
+          console.error('Failed to parse status update:', error);
+        }
+      };
+
+      eventSourceRef.current.onerror = () => {
+        console.error('Status EventSource error');
+        if (isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'error',
+            error: 'Connection error',
+            lastUpdated: new Date(),
+          }));
+        }
+        cleanup();
+      };
+    }
+
+    return cleanup;
+  }, [modelId, status.status, cleanup]);
 
   const handleDownload = useCallback(async () => {
+    if (isDownloadingRef.current) {
+      console.log('Download already in progress for:', modelId);
+      return;
+    }
+
     try {
+      cleanup(); // Clean up any existing connections
+      isDownloadingRef.current = true;
+
+      if (!isMountedRef.current) return;
       setStatus((prev) => ({
         ...prev,
         status: 'downloading',
@@ -83,10 +143,12 @@ export function useModelManager(modelId: string) {
       }));
 
       const client = OllamaClient.getInstance();
-      const eventSource = client.setupPullStream(modelId);
+      eventSourceRef.current = client.setupPullStream(modelId);
 
       // Handle download progress
-      eventSource.onmessage = (event: MessageEvent) => {
+      eventSourceRef.current.onmessage = (event: MessageEvent) => {
+        if (!isMountedRef.current) return;
+
         try {
           const data = JSON.parse(event.data) as OllamaModelStatus;
           setStatus((prev) => ({
@@ -97,7 +159,7 @@ export function useModelManager(modelId: string) {
 
           // Close event source when download is complete
           if (data.status === 'ready' || data.status === 'error') {
-            eventSource.close();
+            cleanup();
           }
         } catch (error) {
           console.error('Failed to parse pull status:', error);
@@ -105,26 +167,31 @@ export function useModelManager(modelId: string) {
       };
 
       // Handle errors
-      eventSource.onerror = () => {
+      eventSourceRef.current.onerror = () => {
         console.error('Pull event stream error');
-        setStatus((prev) => ({
-          ...prev,
-          status: 'error',
-          error: 'Failed to download model',
-          lastUpdated: new Date(),
-        }));
-        eventSource.close();
+        if (isMountedRef.current) {
+          setStatus((prev) => ({
+            ...prev,
+            status: 'error',
+            error: 'Failed to download model',
+            lastUpdated: new Date(),
+          }));
+        }
+        cleanup();
       };
     } catch (error) {
       console.error('Failed to start model download:', error);
-      setStatus((prev) => ({
-        ...prev,
-        status: 'error',
-        error: error instanceof Error ? error.message : 'Failed to start download',
-        lastUpdated: new Date(),
-      }));
+      if (isMountedRef.current) {
+        setStatus((prev) => ({
+          ...prev,
+          status: 'error',
+          error: error instanceof Error ? error.message : 'Failed to start download',
+          lastUpdated: new Date(),
+        }));
+      }
+      cleanup();
     }
-  }, [modelId]);
+  }, [modelId, cleanup]);
 
   return {
     status,
