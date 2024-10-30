@@ -2,24 +2,39 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Allow GET requests to /api/docker for EventSource
-  if (request.method === 'GET' && request.nextUrl.pathname === '/api/docker') {
-    return NextResponse.next();
-  }
+  const isEventStream = request.headers.get('accept') === 'text/event-stream';
+  const apiKey = request.headers.get('x-api-key') || request.nextUrl.searchParams.get('apiKey');
 
-  // Check for API key in header for other API routes
-  const apiKey = request.headers.get('x-api-key');
+  // Check if this is an API route
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    // For event streams, check apiKey from query params
+    if (isEventStream) {
+      if (!apiKey || apiKey !== process.env.API_KEY) {
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return NextResponse.next();
+    }
 
-  if (!apiKey || apiKey !== process.env.API_KEY) {
-    return new NextResponse(JSON.stringify({ message: 'Authentication required' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // For regular API requests, check x-api-key header
+    if (!apiKey || apiKey !== process.env.API_KEY) {
+      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   }
 
   return NextResponse.next();
 }
 
+// Fix: Matcher paths must start with '/'
 export const config = {
-  matcher: '/api/:path*',
+  matcher: [
+    '/api/:path*', // Match all API routes
+    '/_next/static/:path*', // Match Next.js static files
+    '/favicon.ico', // Match favicon
+  ],
 };

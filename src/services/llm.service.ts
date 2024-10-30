@@ -1,3 +1,4 @@
+import { OllamaService } from '@/lib/llm/ollama';
 import { LLMProvider } from '@/lib/llm/provider';
 import { FunctionRegistry } from '@/lib/llm/registry';
 import {
@@ -5,17 +6,26 @@ import {
   FunctionDefinition,
   LLMConfig,
   LLMRequestOptions,
+  OllamaModelInfo,
 } from '@/lib/llm/types';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
+/**
+ * LLM Service
+ *
+ * This service is responsible for managing LLM providers and functions.
+ * Used by backend only.
+ */
 export class LLMService {
   private static instance: LLMService;
   private providers: Map<string, LLMProvider>;
   private registry: FunctionRegistry;
+  private ollamaService: OllamaService;
 
   private constructor() {
     this.providers = new Map();
     this.registry = FunctionRegistry.getInstance();
+    this.ollamaService = OllamaService.getInstance();
   }
 
   public static getInstance(): LLMService {
@@ -25,13 +35,66 @@ export class LLMService {
     return LLMService.instance;
   }
 
-  private getProvider(modelId: string): LLMProvider {
-    if (!this.providers.has(modelId)) {
-      const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
-      if (!model) {
-        throw new Error(`Model ${modelId} not found`);
-      }
+  private async setupLocalProvider(modelId: string): Promise<LLMProvider> {
+    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+    if (!model) {
+      throw new Error(`Model ${modelId} not found`);
+    }
 
+    // Check if Ollama is healthy
+    const isHealthy = await this.ollamaService.checkHealth();
+    if (!isHealthy) {
+      throw new Error('Ollama service is not available');
+    }
+
+    // Check if model is available locally
+    const availableModels = await this.ollamaService.listModels();
+    const modelExists = availableModels.some((m) => m.name === model.id);
+
+    // Pull model if not available
+    if (!modelExists) {
+      const pulled = await this.ollamaService.pullModel(model.id);
+      if (!pulled) {
+        throw new Error(`Failed to pull model ${model.id}`);
+      }
+    }
+
+    const config: LLMConfig = {
+      provider: 'local',
+      model: model.id,
+      temperature: 0.7,
+      maxTokens: model.maxOutputTokens,
+      ollamaConfig: {
+        baseUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
+        parameters: {
+          temperature: 0.7,
+          numPredict: model.maxOutputTokens,
+          topK: 40,
+          topP: 0.9,
+          repeatPenalty: 1.1,
+        },
+      },
+    };
+
+    return new LLMProvider(config);
+  }
+
+  private async getProvider(modelId: string): Promise<LLMProvider> {
+    const provider = this.providers.get(modelId);
+    if (provider) {
+      return provider;
+    }
+
+    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
+    if (!model) {
+      throw new Error(`Model ${modelId} not found`);
+    }
+
+    if (model.provider === 'local') {
+      const provider = await this.setupLocalProvider(modelId);
+      this.providers.set(modelId, provider);
+      return provider;
+    } else {
       const config: LLMConfig = {
         provider: model.provider,
         model: model.id,
@@ -39,11 +102,10 @@ export class LLMService {
         temperature: 0.7,
         maxTokens: model.maxOutputTokens,
       };
-
-      this.providers.set(modelId, new LLMProvider(config));
+      const provider = new LLMProvider(config);
+      this.providers.set(modelId, provider);
+      return provider;
     }
-
-    return this.providers.get(modelId)!;
   }
 
   private getApiKey(provider: string): string {
@@ -55,6 +117,10 @@ export class LLMService {
     }
 
     return key;
+  }
+
+  public async getLocalModels(): Promise<OllamaModelInfo[]> {
+    return this.ollamaService.listModels();
   }
 
   public async sendMessage(message: string, modelId: string, options?: LLMRequestOptions) {
@@ -70,7 +136,7 @@ export class LLMService {
           msg instanceof HumanMessage || msg instanceof AIMessage || msg instanceof SystemMessage
       );
 
-      const provider = this.getProvider(modelId);
+      const provider = await this.getProvider(modelId);
       return await provider.generateResponse(message, {
         ...options,
         history,

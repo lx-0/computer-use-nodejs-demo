@@ -1,4 +1,5 @@
 import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatOllama } from '@langchain/community/chat_models/ollama';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
@@ -37,6 +38,19 @@ export class LLMProvider {
           anthropicApiKey: this.config.apiKey,
           temperature: this.config.temperature,
           maxTokens: this.config.maxTokens,
+        });
+      case 'local':
+        if (!this.config.ollamaConfig?.baseUrl) {
+          throw new Error('Ollama base URL is required for local models');
+        }
+
+        return new ChatOllama({
+          model: this.config.model,
+          baseUrl: this.config.ollamaConfig.baseUrl,
+          temperature: this.config.temperature,
+          numPredict: this.config.maxTokens,
+          // Additional Ollama-specific settings
+          ...this.config.ollamaConfig.parameters,
         });
       default:
         throw new Error(`Unsupported provider: ${this.config.provider}`);

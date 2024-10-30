@@ -4,13 +4,31 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/
 // Core LLM types
 export type LLMProvider = 'openai' | 'anthropic' | 'local';
 
+// Add Ollama-specific types
+export interface OllamaConfig {
+  baseUrl: string;
+  numGpu?: number;
+  threads?: number;
+  contextSize?: number;
+  // Ollama-specific parameters
+  parameters?: {
+    numPredict?: number;
+    topK?: number;
+    topP?: number;
+    temperature?: number;
+    repeatPenalty?: number;
+  };
+}
+
+// Update LLMConfig to include Ollama settings
 export interface LLMConfig {
   provider: LLMProvider;
   model: string;
-  apiKey: string;
+  apiKey?: string; // Optional now as local models don't need it
   baseUrl?: string;
   temperature?: number;
   maxTokens?: number;
+  ollamaConfig?: OllamaConfig; // Add Ollama configuration
 }
 
 export interface FunctionDefinition {
@@ -33,21 +51,37 @@ export interface LLMResponse {
   };
 }
 
-export interface LLMModel {
+// Base model information interface that all providers should implement
+export interface BaseModelInfo {
   id: string;
   name: string;
   provider: LLMProvider;
-  contextWindow: number;
+  size?: number; // in MB
+  status: 'not_downloaded' | 'downloading' | 'ready' | 'error';
+  modified_at?: string;
+  contextLength: number;
+  quantization?: string;
+  description?: string;
+}
+
+// Ollama-specific model information
+export interface OllamaModelInfo extends BaseModelInfo {
+  provider: 'local';
+  digest: string; // Ollama-specific
+  modified_at: string; // Required for Ollama
+}
+
+// Update the LLMModel interface to extend BaseModelInfo
+export interface LLMModel extends BaseModelInfo {
   maxOutputTokens: number;
   trainingCutOffDate?: string;
-  description?: string;
 }
 
 const createModel = (
   id: string,
   name: string,
   provider: LLMProvider,
-  contextWindow: number,
+  contextLength: number,
   maxOutputTokens: number,
   description: string,
   trainingCutOffDate?: string
@@ -55,10 +89,11 @@ const createModel = (
   id,
   name,
   provider,
-  contextWindow,
+  contextLength,
   maxOutputTokens,
-  trainingCutOffDate,
   description,
+  trainingCutOffDate,
+  status: 'not_downloaded', // Default status
 });
 
 export const AVAILABLE_MODELS: LLMModel[] = [
@@ -138,6 +173,35 @@ export const AVAILABLE_MODELS: LLMModel[] = [
   //   'Faster and cheaper reasoning model particularly good at coding, math, and science',
   //   'Oct 2023'
   // ),
+
+  // Local Models (via Ollama)
+  createModel(
+    'nemotron:latest',
+    'Nemotron 70B',
+    'local',
+    32768,
+    4096,
+    "NVIDIA's latest open model. Optimized for enterprise use, strong at reasoning and coding. 70B parameters.",
+    'Oct 2024'
+  ),
+  createModel(
+    'nemotron-mini:latest',
+    'Nemotron Mini 4B',
+    'local',
+    16384,
+    4096,
+    'Lightweight version of Nemotron. 4B parameters, efficient for everyday tasks.',
+    'Oct 2024'
+  ),
+  createModel(
+    'llama3.2:3b',
+    'Llama 3.2 3B',
+    'local',
+    4096,
+    2048,
+    'Latest Llama model optimized for efficiency. Good balance of performance and resource usage.',
+    'Oct 2024'
+  ),
 ];
 
 // Sort models by provider and capability
@@ -147,7 +211,7 @@ export const AVAILABLE_MODELS_SORTED = AVAILABLE_MODELS.sort((a, b) => {
     return a.provider.localeCompare(b.provider);
   }
   // Then by context window size (larger first)
-  return b.contextWindow - a.contextWindow;
+  return b.contextLength - a.contextLength;
 });
 
 // Chat Memory Types
@@ -205,4 +269,48 @@ export function createMessage(content: string, role: MessageRole): BaseMessage {
     default:
       return new HumanMessage({ content });
   }
+}
+
+// Update OllamaModelStatus to include more detailed states
+export interface OllamaModelStatus {
+  name: string;
+  status: 'checking' | 'ready' | 'downloading' | 'error';
+  progress?: number;
+  error?: string;
+  downloadedSize?: number;
+  totalSize?: number;
+  lastUpdated: Date;
+  metrics?: ModelResourceMetrics;
+}
+
+// Generic model types that can be used across providers
+export interface ModelResourceMetrics {
+  memoryUsage: number; // in MB
+  gpuMemoryUsage?: number; // in MB
+  gpuUtilization?: number; // percentage
+  temperature?: number; // in Celsius
+}
+
+// Add API response types for better type safety
+export interface OllamaHealthResponse {
+  healthy: boolean;
+}
+
+export interface OllamaListResponse {
+  models: OllamaModelInfo[];
+}
+
+export interface OllamaMetricsResponse {
+  memoryUsage: number;
+  gpuMemoryUsage?: number;
+  gpuUtilization?: number;
+  temperature?: number;
+}
+
+export interface OllamaPullResponse {
+  status: string;
+  digest?: string;
+  total?: number;
+  completed?: number;
+  error?: string;
 }

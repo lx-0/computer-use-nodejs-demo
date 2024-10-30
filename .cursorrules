@@ -96,6 +96,7 @@
 - Always use TypeScript for better type safety and maintainability
 - Maintain clean code principles and follow best practices
 - Use strict and explicit typing; never use the 'any' keyword
+- Follow DRY principle wherever possible
 
 // Project structure
 
@@ -246,3 +247,61 @@ Ensure all required dependencies are properly installed and typed:
 - Support function execution tracking
 - Add message history support
 - Handle message reconstruction
+
+rules:
+
+- name: "TypeScript Strict Mode"
+    pattern: "*.ts,*.tsx"
+    rules:
+  - "No 'any' types allowed"
+  - "Use explicit return types"
+  - "Enable strict null checks"
+  - "Use interface over type where possible"
+
+- name: "Code Organization"
+    pattern: "src/**/*"
+    rules:
+  - "Use feature-based folder structure"
+  - "Keep components pure and focused"
+  - "Separate business logic from UI"
+  - "Use hooks for shared logic"
+
+- name: "API Design"
+    pattern: "src/app/api/**/*"
+    rules:
+  - "Use proper HTTP methods"
+  - "Validate inputs"
+  - "Handle errors gracefully"
+  - "Stream responses when appropriate"
+
+- name: "State Management"
+    pattern: "src/**/*"
+    rules:
+  - "Use React Query for server state"
+  - "Use local state for UI"
+  - "Avoid prop drilling"
+  - "Keep state close to where it's used"
+
+- name: "Testing"
+    pattern: "**/*.test.ts,**/*.test.tsx"
+    rules:
+  - "Write unit tests for utils"
+  - "Write integration tests for API"
+  - "Test error cases"
+  - "Mock external dependencies"
+
+- name: "Documentation"
+    pattern: "**/*"
+    rules:
+  - "Document public APIs"
+  - "Add JSDoc for complex functions"
+  - "Keep README up to date"
+  - "Document environment setup"
+
+- name: "Code Quality"
+    pattern: "*.ts,*.tsx"
+    rules:
+  - "No while(true) loops - use explicit conditions"
+  - "No constant conditions in loops or conditionals"
+  - "Use proper loop termination conditions"
+  - "Avoid infinite loops"

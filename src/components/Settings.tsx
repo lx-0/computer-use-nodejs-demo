@@ -1,53 +1,47 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { ArrowLeftFromLine } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import { LocalModels } from '@/components/llm/LocalModels';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { ErrorBoundary } from 'react-error-boundary';
 
 interface SettingsProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const Settings: React.FC<SettingsProps> = ({ isOpen, onClose }) => {
-  const settingsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target as Node) && isOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
+function ErrorFallback({ error }: { error: Error }) {
   return (
-    <Card
-      ref={settingsRef}
-      className={cn(
-        'w-64 flex flex-col h-screen transition-all duration-300 ease-in-out absolute left-0 top-0 z-10',
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      )}
-    >
-      <CardHeader className="flex-shrink-0">
-        <CardTitle>Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-grow overflow-auto">
-        {/* Add your settings options here */}
-        <p>Settings content goes here</p>
-      </CardContent>
-      <div className="p-4 flex justify-end">
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-10 w-10">
-          <ArrowLeftFromLine className="h-6 w-6" />
-          <span className="sr-only">Close Settings</span>
-        </Button>
-      </div>
-    </Card>
+    <div className="p-4 text-red-500">
+      <h3 className="font-medium">Error loading models</h3>
+      <p className="text-sm">{error.message}</p>
+    </div>
   );
-};
+}
 
-export default Settings;
+export default function Settings({ isOpen, onClose }: SettingsProps) {
+  return (
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Settings</SheetTitle>
+          <SheetDescription>Configure your local models and application settings.</SheetDescription>
+        </SheetHeader>
+
+        <div className="py-4 space-y-6">
+          {/* Existing settings sections */}
+
+          {/* Add Local Models section with error boundary */}
+          <div className="border-t pt-4">
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <LocalModels />
+            </ErrorBoundary>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}

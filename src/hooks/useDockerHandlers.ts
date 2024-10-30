@@ -56,7 +56,8 @@ export function useDockerHandlers({
   const followBuildProgress = useCallback(
     (messageId: string, subprocessId: string): Promise<boolean> => {
       return new Promise((resolve) => {
-        const eventSource = new EventSource(`/api/docker?buildId=${Date.now()}`);
+        const apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
+        const eventSource = new EventSource(`/api/docker?buildId=${Date.now()}&apiKey=${apiKey}`);
         let buildLog = '';
 
         eventSource.onmessage = (event) => {
@@ -299,8 +300,9 @@ export function useDockerHandlers({
 
     const setupStatusStream = () => {
       if (state.containerId) {
+        const apiKey = process.env.NEXT_PUBLIC_API_KEY || '';
         eventSource = new EventSource(
-          `/api/docker?statusId=${Date.now()}&containerId=${state.containerId}`
+          `/api/docker?statusId=${Date.now()}&containerId=${state.containerId}&apiKey=${apiKey}`
         );
 
         eventSource.onmessage = (event) => {

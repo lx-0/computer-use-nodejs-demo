@@ -29,6 +29,8 @@ A Next.js application that uses a large language model to control a computer thr
 >   - ✅ Model selection
 >   - ✅ Model tracking
 >   - ✅ Message history
+>   - ✅ Local model support
+>   - ✅ Model download tracking
 >   - 🔳 Context management
 >   - 🔳 Function calling
 >   - ⬜ Streaming support
@@ -103,6 +105,7 @@ A Next.js application that uses a large language model to control a computer thr
 - Node.js (LTS version)
 - Docker
 - Python 3.11.6 (for certain features)
+- Ollama (for local models) - See [Ollama Setup](#ollama-setup) section
 
 ## Installation
 
@@ -158,6 +161,82 @@ The application includes a custom Docker environment with:
 - Desktop environment with VNC access
 - Firefox ESR with pre-configured extensions
 - Various utility applications
+
+## Ollama Setup
+
+### Installation
+
+#### macOS
+
+```bash
+# Using Homebrew
+brew install ollama
+
+# Start Ollama service
+ollama serve
+```
+
+#### Linux
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Start Ollama service
+systemctl start ollama
+```
+
+#### Windows
+
+1. Install WSL2 if not already installed:
+
+```bash
+wsl --install
+```
+
+2. Install Ollama in WSL2:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+3. Start Ollama service in WSL2:
+
+```bash
+ollama serve
+```
+
+### Configuration
+
+Add the following to your `.env` file:
+
+```env
+# Ollama Configuration
+NEXT_PUBLIC_OLLAMA_URL=http://localhost:11434
+```
+
+### Troubleshooting
+
+1. Check if Ollama is running:
+
+```bash
+curl http://localhost:11434/api/health
+```
+
+2. If not running, start the service:
+
+```bash
+# macOS/Linux
+ollama serve
+
+# Windows (in WSL2)
+wsl -d Ubuntu -u root ollama serve
+```
+
+3. Common issues:
+   - Port 11434 is already in use
+   - Insufficient disk space
+   - GPU drivers not properly installed (for GPU acceleration)
 
 ## Contributing
 

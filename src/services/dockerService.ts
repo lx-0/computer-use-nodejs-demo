@@ -1,4 +1,4 @@
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+import { getApiHeaders } from '@/lib/utils/api';
 
 interface DockerResponse {
   ok: boolean;
@@ -11,10 +11,7 @@ export const dockerService = {
   async fetchDockerfiles() {
     const response = await fetch('/api/docker', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY || '',
-      },
+      headers: getApiHeaders(),
       body: JSON.stringify({ action: 'listDockerfiles' }),
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -24,10 +21,7 @@ export const dockerService = {
   async buildImage(dockerfile: string): Promise<DockerResponse> {
     const response = await fetch('/api/docker', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY || '',
-      },
+      headers: getApiHeaders(),
       body: JSON.stringify({
         action: 'buildImage',
         dockerfile,
@@ -39,10 +33,7 @@ export const dockerService = {
   async startContainer(imageName: string): Promise<DockerResponse> {
     const response = await fetch('/api/docker', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY || '',
-      },
+      headers: getApiHeaders(),
       body: JSON.stringify({
         action: 'startContainer',
         imageName,
@@ -55,10 +46,7 @@ export const dockerService = {
   async stopContainer(containerId: string): Promise<DockerResponse> {
     const response = await fetch('/api/docker', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY || '',
-      },
+      headers: getApiHeaders(),
       body: JSON.stringify({ action: 'stopContainer', containerId }),
     });
     return response.json();
@@ -67,10 +55,7 @@ export const dockerService = {
   async deleteContainer(): Promise<DockerResponse> {
     const response = await fetch('/api/docker', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY || '',
-      },
+      headers: getApiHeaders(),
       body: JSON.stringify({ action: 'deleteContainer' }),
     });
     return response.json();

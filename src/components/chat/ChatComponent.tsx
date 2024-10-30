@@ -3,7 +3,6 @@ import ChatMessage from '@/components/chat/ChatMessage';
 import { DockerMenu } from '@/components/chat/DockerMenu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useDockerHandlers } from '@/hooks/useDockerHandlers';
 import { AVAILABLE_MODELS, convertToLangchainMessage } from '@/lib/llm/types';
@@ -11,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { LLMApiService } from '@/services/llm-api.service';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Settings as SettingsIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ChatCopyButton from './ChatCopyButton';
 
 interface ChatComponentProps {
@@ -107,16 +106,30 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
     }
   };
 
-  const scrollToBottom = useCallback(() => {
-    if (scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current;
-      scrollElement.scrollTop = scrollElement.scrollHeight;
-    }
-  }, []);
+  // effects on messages change
+  const chatMessagesEndRef = useRef<HTMLDivElement | null>(null);
+  const isThrottling = useRef(false);
 
+  // Effect on messages change
   useEffect(() => {
-    scrollToBottom();
-  }, [chatMessages, scrollToBottom]);
+    // automatically scroll to bottom of chat
+    const scrollToBottom = () => {
+      chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    if (!isThrottling.current) {
+      // Execute the function immediately
+      scrollToBottom();
+
+      // Set throttling flag to true
+      isThrottling.current = true;
+
+      // Set timeout to reset throttling after the desired period
+      setTimeout(() => {
+        isThrottling.current = false;
+      }, 100); // Adjust the throttle duration as needed
+    }
+  }, [chatMessages]);
 
   return (
     <Card className={cn('flex flex-col h-full')}>
@@ -144,18 +157,17 @@ const ChatComponent: React.FC<ChatComponentProps> = ({
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden flex flex-col">
         <div className="flex-grow overflow-hidden relative">
-          <ScrollArea className="h-full" ref={scrollAreaRef}>
-            {chatMessages.map((message, index) => (
-              <ChatMessage
-                key={index}
-                message={message}
-                index={index}
-                buildProgress={buildProgress}
-                toggleMessageExpansion={toggleMessageExpansion}
-                toggleSubprocessExpansion={toggleSubprocessExpansion}
-              />
-            ))}
-          </ScrollArea>
+          {chatMessages.map((message, index) => (
+            <ChatMessage
+              key={index}
+              message={message}
+              index={index}
+              buildProgress={buildProgress}
+              toggleMessageExpansion={toggleMessageExpansion}
+              toggleSubprocessExpansion={toggleSubprocessExpansion}
+            />
+          ))}
+          <div ref={chatMessagesEndRef} />
           <ChatCopyButton messages={chatMessages} />
         </div>
         <ChatInput

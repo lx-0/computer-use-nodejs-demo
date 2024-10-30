@@ -258,21 +258,28 @@ export async function GET(request: Request) {
   const buildId = searchParams.get('buildId');
   const statusId = searchParams.get('statusId');
   const containerId = searchParams.get('containerId');
+  const apiKey = searchParams.get('apiKey');
+
+  // Check API key
+  if (!apiKey || apiKey !== process.env.API_KEY) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   if (buildId) {
-    // Existing build progress stream logic
+    // Existing build progress stream logic with headers
     return new Response(
       new ReadableStream({
         start(controller) {
           const listener = (event: any) => {
-            // console.log('Emitting build event:', event);
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 
           buildEmitter.on('progress', listener);
 
           request.signal.addEventListener('abort', () => {
-            console.log('Build stream client disconnected');
             buildEmitter.removeListener('progress', listener);
           });
         },
@@ -286,27 +293,22 @@ export async function GET(request: Request) {
       }
     );
   } else if (statusId && containerId) {
-    // New container status stream
+    // Container status stream with headers
     return new Response(
       new ReadableStream({
         start(controller) {
           const listener = (event: any) => {
-            // console.log('Emitting status event:', event);
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 
           statusEmitter.on('status', listener);
-
-          // Initial status check
           emitContainerStatus(containerId);
 
-          // Set up interval for status updates
           const intervalId = setInterval(() => {
             emitContainerStatus(containerId);
           }, 5000);
 
           request.signal.addEventListener('abort', () => {
-            console.log('Status stream client disconnected');
             statusEmitter.removeListener('status', listener);
             clearInterval(intervalId);
           });
