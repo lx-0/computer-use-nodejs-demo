@@ -27,6 +27,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   const stream = new ReadableStream({
     start: async (controller) => {
       let isControllerClosed = false;
+      let throttledSendStatus: ReturnType<typeof throttle> | null = null;
 
       // Helper function to check if we can send
       const canSend = () => !isControllerClosed;
@@ -47,27 +48,31 @@ export async function GET(req: NextRequest): Promise<Response> {
         }
       };
 
-      // Create throttled version of sendStatus
-      const throttledSendStatus = throttle((status: OllamaModelStatus) => {
-        if (canSend()) sendStatus(status);
-      }, 1000);
-
       let keepAliveInterval: ReturnType<typeof setInterval> | undefined;
 
       const cleanup = () => {
         if (isControllerClosed) return; // Prevent multiple cleanups
 
         isControllerClosed = true;
+
+        // Cancel throttled function if it exists
+        if (throttledSendStatus) {
+          throttledSendStatus.cancel();
+          throttledSendStatus = null;
+        }
+
+        // Clear intervals
         if (keepAliveInterval) {
           clearInterval(keepAliveInterval);
           keepAliveInterval = undefined;
         }
 
-        // Cancel any pending throttled functions
-        throttledSendStatus.cancel();
-
         // Close the controller last
-        controller.close();
+        try {
+          controller.close();
+        } catch (error) {
+          console.error('Error closing controller:', error);
+        }
       };
 
       try {
@@ -83,6 +88,11 @@ export async function GET(req: NextRequest): Promise<Response> {
         };
         sendStatus(initialStatus);
 
+        // Create throttled version of sendStatus
+        throttledSendStatus = throttle((status: OllamaModelStatus) => {
+          if (canSend()) sendStatus(status);
+        }, 1000);
+
         // Start pull process with progress callback
         await ollama.pullModel(modelId, (status: OllamaModelStatus) => {
           if (!canSend()) return;
@@ -93,7 +103,7 @@ export async function GET(req: NextRequest): Promise<Response> {
               timestamp: new Date().toISOString(),
             };
 
-            if (status.status === 'downloading') {
+            if (status.status === 'downloading' && throttledSendStatus) {
               throttledSendStatus(statusWithTimestamp);
             } else {
               // Send terminal states immediately and cleanup
