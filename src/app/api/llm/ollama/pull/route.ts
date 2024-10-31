@@ -84,8 +84,10 @@ export async function GET(req: NextRequest): Promise<Response> {
           if (controller.desiredSize !== null) {
             controller.close();
           }
-        } catch (error) {
-          console.error('Error closing controller:', error);
+        } catch (error: unknown) {
+          console.error(
+            `Error closing controller: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
         }
       };
 
