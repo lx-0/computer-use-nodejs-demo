@@ -195,6 +195,24 @@ export const AVAILABLE_MODELS: LLMModel[] = [
     'Latest Llama model optimized for efficiency. Good balance of performance and resource usage.',
     'Oct 2024'
   ),
+  createModel(
+    'qwen2.5-coder:32b',
+    'Qwen 2.5 coder 32B',
+    'local',
+    4096, // ?
+    2048, // ?
+    'The latest series of Code-Specific Qwen models, with significant improvements in code generation, code reasoning, and code fixing.',
+    'Oct 2024' // ?
+  ),
+  createModel(
+    'qwen2.5-coder:14b',
+    'Qwen 2.5 coder 14B',
+    'local',
+    4096, // ?
+    2048, // ?
+    'The latest series of Code-Specific Qwen models, with significant improvements in code generation, code reasoning, and code fixing.',
+    'Oct 2024' // ?
+  ),
 ];
 
 // Sort models by provider and capability

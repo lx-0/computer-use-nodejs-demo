@@ -221,7 +221,7 @@ async function buildImage(dockerfile: string, imageName: string) {
 
     docker.modem.followProgress(
       stream,
-      (err, result) => {
+      (err, _result) => {
         if (err) {
           console.error('Build error:', err);
           buildEmitter.emit('progress', {
@@ -273,7 +273,7 @@ export async function GET(request: Request) {
     return new Response(
       new ReadableStream({
         start(controller) {
-          const listener = (event: any) => {
+          const listener = (event: unknown) => {
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 
@@ -297,7 +297,7 @@ export async function GET(request: Request) {
     return new Response(
       new ReadableStream({
         start(controller) {
-          const listener = (event: any) => {
+          const listener = (event: unknown) => {
             controller.enqueue(`data: ${JSON.stringify(event)}\n\n`);
           };
 

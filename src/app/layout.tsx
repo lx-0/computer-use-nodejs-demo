@@ -7,7 +7,7 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const metadata: Metadata = {
+const _metadata: Metadata = {
   title: 'LLM-Controlled Computer',
   description: 'A Next.js application that uses a large language model to control a computer',
 };
