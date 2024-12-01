@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { cn } from '@/lib/utils/style';
 import React, { useCallback, useEffect, useState } from 'react';
 

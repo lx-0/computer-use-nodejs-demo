@@ -1,13 +1,8 @@
+import { FunctionDefinition } from '@/lib/functions/types';
 import { OllamaService } from '@/lib/llm/api/ollama';
 import { LLMProvider } from '@/lib/llm/provider';
 import { FunctionRegistry } from '@/lib/llm/registry';
-import {
-  AVAILABLE_MODELS,
-  FunctionDefinition,
-  LLMConfig,
-  LLMRequestOptions,
-  OllamaModelInfo,
-} from '@/lib/llm/types';
+import { AVAILABLE_MODELS, LLMConfig, LLMRequestOptions, OllamaModelInfo } from '@/lib/llm/types';
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 /**
@@ -36,8 +31,8 @@ export class LLMService {
   }
 
   private async setupLocalProvider(modelId: string): Promise<LLMProvider> {
-    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
-    if (!model) {
+    const modelConfig = AVAILABLE_MODELS.find((m) => m.id === modelId);
+    if (!modelConfig) {
       throw new Error(`Model ${modelId} not found`);
     }
 
@@ -49,26 +44,26 @@ export class LLMService {
 
     // Check if model is available locally
     const availableModels = await this.ollamaService.listModels();
-    const modelExists = availableModels.some((m) => m.name === model.id);
+    const modelExists = availableModels.some((m) => m.name === modelConfig.id);
 
     // Pull model if not available
     if (!modelExists) {
-      const pulled = await this.ollamaService.pullModel(model.id);
+      const pulled = await this.ollamaService.pullModel(modelConfig.id);
       if (!pulled) {
-        throw new Error(`Failed to pull model ${model.id}`);
+        throw new Error(`Failed to pull model ${modelConfig.id}`);
       }
     }
 
     const config: LLMConfig = {
       provider: 'local',
-      model: model.id,
+      model: modelConfig.id,
       temperature: 0.7,
-      maxTokens: model.maxOutputTokens,
+      maxTokens: modelConfig.maxOutputTokens,
       ollamaConfig: {
         baseUrl: process.env.OLLAMA_URL || 'http://localhost:11434',
         parameters: {
           temperature: 0.7,
-          numPredict: model.maxOutputTokens,
+          numPredict: modelConfig.maxOutputTokens,
           topK: 40,
           topP: 0.9,
           repeatPenalty: 1.1,
@@ -85,22 +80,22 @@ export class LLMService {
       return provider;
     }
 
-    const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
-    if (!model) {
+    const modelConfig = AVAILABLE_MODELS.find((m) => m.id === modelId);
+    if (!modelConfig) {
       throw new Error(`Model ${modelId} not found`);
     }
 
-    if (model.provider === 'local') {
+    if (modelConfig.provider === 'local') {
       const provider = await this.setupLocalProvider(modelId);
       this.providers.set(modelId, provider);
       return provider;
     } else {
       const config: LLMConfig = {
-        provider: model.provider,
-        model: model.id,
-        apiKey: this.getApiKey(model.provider),
+        provider: modelConfig.provider,
+        model: modelConfig.id,
+        apiKey: this.getApiKey(modelConfig.provider),
         temperature: 0.7,
-        maxTokens: model.maxOutputTokens,
+        maxTokens: modelConfig.maxOutputTokens,
       };
       const provider = new LLMProvider(config);
       this.providers.set(modelId, provider);
@@ -125,8 +120,8 @@ export class LLMService {
 
   public async sendMessage(message: string, modelId: string, options?: LLMRequestOptions) {
     try {
-      const model = AVAILABLE_MODELS.find((m) => m.id === modelId);
-      if (!model) {
+      const modelConfig = AVAILABLE_MODELS.find((m) => m.id === modelId);
+      if (!modelConfig) {
         throw new Error(`Model ${modelId} not found`);
       }
 
@@ -140,7 +135,7 @@ export class LLMService {
       return await provider.generateResponse(message, {
         ...options,
         history,
-        maxTokens: model.maxOutputTokens,
+        maxTokens: modelConfig.maxOutputTokens,
       });
     } catch (error) {
       throw new Error(

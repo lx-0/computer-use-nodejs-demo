@@ -67,13 +67,13 @@ declare module '@novnc/novnc/lib/rfb' {
 
     // Static properties
     static messages: {
-      keyEvent(sock: any, keysym: number, down: boolean): void;
-      pointerEvent(sock: any, x: number, y: number, mask: number): void;
-      clientCutText(sock: any, text: string): void;
-      pixelFormat(sock: any, depth: number, trueColor: boolean): void;
-      clientEncodings(sock: any, encodings: number[]): void;
+      keyEvent(sock: unknown, keysym: number, down: boolean): void;
+      pointerEvent(sock: unknown, x: number, y: number, mask: number): void;
+      clientCutText(sock: unknown, text: string): void;
+      pixelFormat(sock: unknown, depth: number, trueColor: boolean): void;
+      clientEncodings(sock: unknown, encodings: number[]): void;
       fbUpdateRequest(
-        sock: any,
+        sock: unknown,
         incremental: boolean,
         x: number,
         y: number,

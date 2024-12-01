@@ -1,4 +1,4 @@
-import { FunctionDefinition } from './types';
+import { FunctionDefinition } from '@/lib/functions/types';
 
 export class FunctionRegistry {
   private static instance: FunctionRegistry;

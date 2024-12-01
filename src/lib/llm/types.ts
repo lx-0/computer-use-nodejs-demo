@@ -213,6 +213,15 @@ export const AVAILABLE_MODELS: LLMModel[] = [
     'The latest series of Code-Specific Qwen models, with significant improvements in code generation, code reasoning, and code fixing.',
     'Oct 2024' // ?
   ),
+  createModel(
+    'dolphin-mistral:latest',
+    'dolphin-mistral',
+    'local',
+    4096, // ?
+    2048, // ?
+    'Uncensored, 8x7b and 8x22b fine-tuned models based on the Mixtral mixture of experts models that excels at coding tasks. Created by Eric Hartford.',
+    'Oct 2024' // ?
+  ),
 ];
 
 // Sort models by provider and capability

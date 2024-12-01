@@ -8,17 +8,22 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { OllamaClient } from '@/lib/llm/ollama-client';
-import { AVAILABLE_MODELS, LLMModel } from '@/lib/llm/types';
+import { LLMModel } from '@/lib/llm/types';
 import { cn } from '@/lib/utils/style';
 import { Download } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface ModelSelectorProps {
+  models: LLMModel[];
   selectedModel: string;
   onModelSelect: (model: string) => void;
 }
 
-export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onModelSelect }) => {
+export const ModelSelector: React.FC<ModelSelectorProps> = ({
+  models,
+  selectedModel,
+  onModelSelect,
+}) => {
   const [installedLocalModels, setInstalledLocalModels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +44,10 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
     fetchLocalModels();
   }, []);
 
-  const selectedModelInfo = AVAILABLE_MODELS.find((model) => model.id === selectedModel);
+  const selectedModelInfo = models.find((model) => model.id === selectedModel);
 
   // Filter models based on installation status
-  const modelsByProvider = AVAILABLE_MODELS.reduce(
+  const modelsByProvider = models.reduce(
     (acc, model) => {
       // Include non-local models and installed local models
       if (model.provider !== 'local' || installedLocalModels.includes(model.id)) {
@@ -56,7 +61,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onM
   );
 
   // Get local models that need to be downloaded
-  const downloadableModels = AVAILABLE_MODELS.filter(
+  const downloadableModels = models.filter(
     (model) => model.provider === 'local' && !installedLocalModels.includes(model.id)
   );
 
